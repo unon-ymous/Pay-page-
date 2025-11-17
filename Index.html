@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Pay by UPI</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 20px; }
+    button { padding: 12px 18px; margin: 8px; font-size: 16px; cursor: pointer; }
+    .small { font-size: 13px; color: #444; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h2>Pay via UPI</h2>
+
+  <!-- Buttons for specific apps -->
+  <button id="gpay">Pay with Google Pay</button>
+  <button id="phonepe">Pay with PhonePe</button>
+  <button id="paytm">Pay with Paytm</button>
+
+  <!-- Button to open chooser (any installed UPI app) -->
+  <button id="anyupi">Pay (Any UPI app)</button>
+
+  <div class="small" id="status">Replace VPA/amount in script. Test on mobile.</div>
+
+  <script>
+  // ====== Configuration - change these values to yours ======
+  const PAYEE_VPA = "merchant@upi";      // pa - payee UPI ID
+  const PAYEE_NAME = "Merchant Name";    // pn - payee name
+  const DEFAULT_AMOUNT = "50.00";        // am - amount in INR (string)
+  const TRANSACTION_NOTE = "Order 123";  // tn - transaction note
+  // ========================================================
+
+  function makeUpiUri(amount = DEFAULT_AMOUNT) {
+    const params = new URLSearchParams({
+      pa: PAYEE_VPA,
+      pn: PAYEE_NAME,
+      am: amount,
+      tn: TRANSACTION_NOTE,
+      cu: "INR"
+    });
+    return "upi://pay?" + params.toString();
+  }
+
+  // Generic attempt: try opening UPI URI (will present chooser on many devices)
+  function openUpiUri(uri) {
+    // On mobile browsers, setting location to the URI will try to open the app.
+    window.location.href = uri;
+  }
+
+  // Android-specific: use intent:// with package to target a specific app
+  // Format: intent://pay?{query}#Intent;scheme=upi;package={package};end
+  function makeIntentForPackage(packageName, amount = DEFAULT_AMOUNT) {
+    const query = new URLSearchParams({
+      pa: PAYEE_VPA,
+      pn: PAYEE_NAME,
+      am: amount,
+      tn: TRANSACTION_NOTE,
+      cu: "INR"
+    }).toString();
+    return `intent://pay?${query}#Intent;scheme=upi;package=${packageName};end`;
+  }
+
+  // App package names (common)
+  const PACKAGES = {
+    gpay: "com.google.android.apps.nbu.paisa.user",
+    phonepe: "com.phonepe.app",
+    paytm: "net.one97.paytm"
+  };
+
+  // Buttons
+  document.getElementById("anyupi").addEventListener("click", () => {
+    openUpiUri(makeUpiUri());
+  });
+
+  document.getElementById("gpay").addEventListener("click", () => {
+    // Use Android intent for Google Pay; fallback to generic UPI URI
+    const intentUrl = makeIntentForPackage(PACKAGES.gpay);
+    // Attempt the intent first (works on Android Chrome). On iOS / desktop, fallback to UPI URI.
+    tryOpen(intentUrl, makeUpiUri());
+  });
+
+  document.getElementById("phonepe").addEventListener("click", () => {
+    const intentUrl = makeIntentForPackage(PACKAGES.phonepe);
+    tryOpen(intentUrl, makeUpiUri());
+  });
+
+  document.getElementById("paytm").addEventListener("click", () => {
+    const intentUrl = makeIntentForPackage(PACKAGES.paytm);
+    tryOpen(intentUrl, makeUpiUri());
+  });
+
+  // tryOpen: attempt intent URL then fallback URI
+  function tryOpen(primaryUrl, fallbackUrl) {
+    const ua = navigator.userAgent || "";
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+    if (isAndroid) {
+      // On Android Chrome, setting location to intent: works. For other browsers, fallback.
+      window.location.href = primaryUrl;
+      // As an extra safety net, also schedule the fallback after a short delay.
+      // Some browsers/OS block immediate fallbacks; still this is a pragmatic approach.
+      setTimeout(() => {
+        // If user is still on page, open generic UPI URI (could open chooser)
+        window.location.href = fallbackUrl;
+      }, 1200);
+    } else if (isIOS) {
+      // iOS: try generic UPI URI (apps that register it will open)
+      window.location.href = fallbackUrl;
+    } else {
+      // Desktop: show UPI string (copy user) or QR code (you can implement).
+      alert("Open this page on a mobile device to complete UPI payment. UPI URI:\n\n" + fallbackUrl);
+    }
+  }
+  </script>
+</body>
+</html>
