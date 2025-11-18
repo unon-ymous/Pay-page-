@@ -12,15 +12,16 @@
       --accent:#0b61ff;
       --radius:12px;
       --shadow:0 10px 30px rgba(12,20,40,0.06);
-      --shiny: linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0));
+      --light-gray:#f3f4f6;
+      --copy-gray:#eef2f6;
     }
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--page-bg);color:#0f1724}
 
-    /* single-layer container */
+    /* container */
     .page{max-width:760px;margin:18px auto;padding:0 12px}
     .card{background:linear-gradient(180deg,#f8fcff,#ffffff);border-radius:16px;padding:14px;box-shadow:var(--shadow);overflow:hidden}
 
-    /* Topbar inside same card */
+    /* topbar */
     .topbar{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(90deg,#e6f5ff,#dff2ff)}
     .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#0b61ff,#33a1ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px}
     .title{font-size:26px;font-style:italic;color:#08324a;font-weight:800;letter-spacing:0.3px}
@@ -31,14 +32,12 @@
     .qr-frame img{width:100%;height:100%;object-fit:cover;display:block}
     .controls{display:flex;gap:10px;align-items:center;width:92%}
     .download{flex:1;padding:12px;border-radius:10px;background:linear-gradient(90deg,#dff7e1,#c6f0c9);border:1px solid rgba(10,91,46,0.08);font-weight:700;cursor:pointer}
-    .upload{padding:10px;border-radius:10px;background:#fff;border:1px solid rgba(8,12,20,0.06);cursor:pointer}
-    .small-muted{font-size:13px;color:var(--muted)}
 
-    /* UPI row */
-    .upi-row{margin-top:10px;display:flex;align-items:center;gap:10px}
-    .upi-label{font-size:12px;color:var(--muted);min-width:40px}
-    .upi-field{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(8,12,20,0.06);background:#fafcff;font-weight:700}
-    .copy-small{padding:8px 10px;border-radius:10px;background:linear-gradient(90deg,#0b61ff,#33a1ff);color:#fff;border:0;cursor:pointer}
+    /* UPI single thin box with copy inside */
+    .upi-box{margin-top:10px;display:flex;align-items:center;gap:8px;width:92%}
+    .upi-pill{flex:1;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:10px;background:#fafcff;border:1px solid rgba(8,12,20,0.06);font-weight:700}
+    .upi-text{font-size:15px;color:#0b1f2f}
+    .copy-btn{padding:6px 10px;border-radius:8px;background:var(--copy-gray);color:#425066;border:0;cursor:pointer;font-weight:700}
 
     /* apps */
     .apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
@@ -46,24 +45,26 @@
     .paytm{background:linear-gradient(90deg,#e6f0ff,#cfe6ff);color:#003366}
     .gpay{background:linear-gradient(90deg,#fff,#fff7ed);color:#111;border:1px solid rgba(0,0,0,0.06)}
     .phonepe{background:linear-gradient(90deg,#f3e9ff,#efe2ff);color:#3a0b66}
-    .other{background:linear-gradient(90deg,#fff,#f4f3ff);color:#2f2d36}
+    .other{background:linear-gradient(90deg,#dcd6ff,#cfc6ff);color:#221f3a} /* darker */
 
-    /* carousel */
-    .carousel{margin-top:12px;overflow:hidden;border-radius:8px}
+    /* carousel + static header */
+    .carousel-wrap{margin-top:12px}
+    .carousel-header{padding:8px;border-radius:8px;background:linear-gradient(180deg,#f5f7fa,#ffffff);border:1px solid rgba(8,12,20,0.04);color:#475569;font-weight:700;font-size:14px}
+    .carousel{margin-top:8px;overflow:hidden;border-radius:8px}
     .slides{display:flex;transition:transform 0.6s ease}
     .slide{min-width:100%;flex-shrink:0;padding:6px}
     .slide img{width:100%;height:120px;object-fit:cover;border-radius:8px}
 
-    /* instructions in light shiny box */
-    .instructions-box{margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#f8fbff,#ffffff);border:1px solid rgba(8,12,20,0.04);box-shadow:0 6px 18px rgba(11,97,255,0.03)}
+    /* instructions in light shiny box (smaller text) */
+    .instructions-box{margin-top:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#f8fbff,#ffffff);border:1px solid rgba(8,12,20,0.04);box-shadow:0 6px 18px rgba(11,97,255,0.03)}
     .how-title{font-weight:800;color:#111;margin-bottom:8px}
-    .how-list{display:flex;flex-direction:column;gap:8px}
-    .how-item{background:transparent;padding:8px;color:#475569}
+    .how-list{display:flex;flex-direction:column;gap:6px}
+    .how-item{background:transparent;padding:6px;color:#475569;font-size:13px}
 
     /* contact */
     .contact-row{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px}
-    .contact-btn{padding:8px 14px;border-radius:8px;background:#f3f4f6;color:#111;border:0;font-weight:700;cursor:pointer}
-    .contact-small{font-size:13px;color:var(--muted)}
+    .contact-btn{padding:12px 18px;border-radius:8px;background:#f3f4f6;color:#111;border:0;font-weight:800;cursor:pointer}
+    .contact-small{font-size:13px;color:var(--muted);text-align:center}
 
     @media (max-width:480px){
       .qr-frame{width:260px;height:260px}
@@ -74,29 +75,29 @@
 <body>
   <div class="page">
     <div class="card">
+      <!-- top bar in the same card -->
       <div class="topbar">
         <div class="logo">Pay</div>
         <div class="title">Pay Here</div>
       </div>
 
+      <!-- QR area -->
       <div class="qr-wrap">
         <div class="qr-frame" id="qrframe"><img id="qrimg" src="" alt="QR image"></div>
         <div class="controls">
           <button id="downloadBtn" class="download">Download QR Code</button>
-          <label class="upload">
-            Change QR
-            <input id="qrInput" type="file" accept="image/*" style="display:none">
-          </label>
         </div>
-        <div class="small-muted">Users will enter the amount in their UPI app. QR opens payment with UPI ID embedded.</div>
       </div>
 
-      <div class="upi-row">
-        <div class="upi-label">UPI</div>
-        <div class="upi-field" id="upiField">merchant@upi</div>
-        <button id="copyUpi" class="copy-small">💬 Copy</button>
+      <!-- UPI thin pill with copy -->
+      <div class="upi-box">
+        <div class="upi-pill">
+          <div class="upi-text" id="upiField">merchant@upi</div>
+          <button id="copyUpi" class="copy-btn">Copy</button>
+        </div>
       </div>
 
+      <!-- App buttons -->
       <div class="apps">
         <button id="btnPaytm" class="app-btn paytm">PAYTM</button>
         <button id="btnGpay" class="app-btn gpay">G PAY</button>
@@ -104,29 +105,38 @@
         <button id="btnOther" class="app-btn other">Other UPI Apps</button>
       </div>
 
-      <div class="carousel"><div class="slides" id="slides"></div></div>
+      <!-- carousel header (static) and carousel (images move) -->
+      <div class="carousel-wrap">
+        <div class="carousel-header">How to send payment Screenshot</div>
+        <div class="carousel"><div class="slides" id="slides"></div></div>
+      </div>
 
+      <!-- instructions -->
       <div class="instructions-box">
         <div class="how-title">How to send Correct Payment — Screenshot after your Payment</div>
         <div class="how-list" id="howList"></div>
       </div>
 
+      <!-- contact -->
       <div class="contact-row">
-        <button id="contactBtn" class="contact-btn">✉️ Contact Admin</button>
-        <div class="contact-small" id="contactSmall">Need help? Message admin</div>
+        <button id="contactBtn" class="contact-btn">💬 Contact Admin</button>
+        <div class="contact-small" id="contactSmall">Message admin for order confirmation</div>
       </div>
 
     </div>
   </div>
 
 <script>
-/* ADMIN */
+/* ================= ADMIN CONFIG =================
+ * Change the values below to your real UPI, payee name and contact link.
+ * ================================================= */
 const ADMIN = {
-  upi: 'merchant@upi',
-  payeeName: 'Merchant Name',
-  contactLink: 'https://wa.me/919999999999',
+  upi: 'merchant@upi',                // <-- your UPI ID
+  payeeName: 'Merchant Name',         // <-- payee name
+  contactLink: 'https://wa.me/919999999999', // <-- your WhatsApp/Telegram link
   contactText: 'Contact Admin',
   carousel: [
+    // replace these with your tutorial images/screenshots
     'https://images.unsplash.com/photo-1521790366064-7986c2920212?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=1200&q=80'
@@ -135,72 +145,61 @@ const ADMIN = {
     'Open any UPI app or scan the QR with your UPI app.',
     'Confirm the UPI ID and payee name before approving.',
     'Enter the exact amount in your UPI app (do not rely on defaults).',
-    'After payment, take a screenshot and send it to admin.'
+    'After payment, take a screenshot and send it to admin for confirmation.'
   ]
 };
+/* ================================================= */
 
-// refs
 const upiField = document.getElementById('upiField');
 const qrImg = document.getElementById('qrimg');
 const downloadBtn = document.getElementById('downloadBtn');
-const qrInput = document.getElementById('qrInput');
 const slidesEl = document.getElementById('slides');
 const howList = document.getElementById('howList');
 const contactBtn = document.getElementById('contactBtn');
 
 upiField.textContent = ADMIN.upi;
-contactBtn.textContent = '✉️ ' + (ADMIN.contactText || 'Contact Admin');
+contactBtn.textContent = '💬 ' + (ADMIN.contactText || 'Contact Admin');
 
-// build initial QR from UPI uri
+/* Generate initial QR from UPI URI (no amount included so user enters in app) */
 function buildUpiUri(){
   const params = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'});
   return 'upi://pay?' + params.toString();
 }
 function initialQrSrc(){
   const uri = buildUpiUri();
+  // Use Google Chart API to generate QR (1000x1000 for quality)
   return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
 }
 qrImg.src = initialQrSrc();
 
-// Populate carousel
-ADMIN.carousel.forEach(url => { const s=document.createElement('div'); s.className='slide'; const img=document.createElement('img'); img.src=url; s.appendChild(img); slidesEl.appendChild(s); });
-let cIndex=0; function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
-setInterval(()=>{ cIndex=(cIndex+1)%ADMIN.carousel.length; showSlide(cIndex); },2200);
+/* Populate carousel images */
+ADMIN.carousel.forEach(url => {
+  const s = document.createElement('div'); s.className = 'slide';
+  const img = document.createElement('img'); img.src = url; img.alt = 'step';
+  s.appendChild(img); slidesEl.appendChild(s);
+});
+let cIndex = 0;
+function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
+setInterval(()=>{ cIndex = (cIndex+1) % ADMIN.carousel.length; showSlide(cIndex); }, 2200);
 
-// instructions
-ADMIN.instructions.forEach(line=>{ const d=document.createElement('div'); d.className='how-item'; d.textContent=line; howList.appendChild(d); });
-
-// Change QR by file upload (admin uses this to set their QR image). We convert to data URL so downloads always work.
-qrInput.addEventListener('change', async (e)=>{
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{ qrImg.src = reader.result; showToast('QR image updated'); };
-  reader.readAsDataURL(f);
+/* Populate instructions (smaller text) */
+ADMIN.instructions.forEach(line => {
+  const d = document.createElement('div'); d.className = 'how-item'; d.textContent = line; howList.appendChild(d);
 });
 
-// Strong download: if src is data URL or same-origin, fetch blob and trigger download. Use fetch to get blob even for data URLs by converting.
+/* Download QR: fetch -> blob -> download (best-effort) */
 async function downloadQr(){
   try{
     const src = qrImg.src;
-    // If data URL, convert to blob manually
-    if(src.startsWith('data:')){
-      // convert dataURL to blob
-      const res = await fetch(src);
-      const blob = await res.blob();
-      triggerDownload(blob, 'upi-qr.png');
-      showToast('QR downloaded');
-      return;
-    }
-    // otherwise fetch remote image as blob
+    // fetch the image (works for data URLs and CORS-allowed hosts)
     const resp = await fetch(src, {mode:'cors'});
     if(!resp.ok) throw new Error('Network response not ok');
     const blob = await resp.blob();
-    triggerDownload(blob, 'upi-qr.png');
-    showToast('QR downloaded');
+    triggerDownload(blob, 'upi-qr-' + Date.now() + '.png');
+    showToast('QR downloaded to device');
   }catch(err){
-    console.warn('Download failed', err);
-    // As last fallback, open image in new tab — but we try to avoid this
+    console.warn('Download failed, fallback to open', err);
+    // fallback: open image (user can long-press to save)
     window.open(qrImg.src, '_blank');
     showToast('Could not download directly — opened image to save manually');
   }
@@ -208,18 +207,24 @@ async function downloadQr(){
 function triggerDownload(blob, filename){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
 }
-
 downloadBtn.addEventListener('click', downloadQr);
 
-// Copy UPI
+/* Copy UPI to clipboard (Copy button inside same pill) */
 document.getElementById('copyUpi').addEventListener('click', async ()=>{
-  try{ await navigator.clipboard.writeText(ADMIN.upi); showToast('UPI copied to clipboard'); }
-  catch(e){ const t=document.createElement('textarea'); t.value=ADMIN.upi; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast('UPI copied'); }
+  try{
+    await navigator.clipboard.writeText(ADMIN.upi);
+    showToast('UPI copied to clipboard');
+  }catch(e){
+    const t = document.createElement('textarea'); t.value = ADMIN.upi; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); t.remove();
+    showToast('UPI copied to clipboard');
+  }
 });
 
-// App openers (no amount passed — user fills in app)
+/* App openers (no amount passed) */
 const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
 function openChain(pref){
   const query = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'}).toString();
@@ -227,22 +232,43 @@ function openChain(pref){
   const ua = navigator.userAgent || '';
   const isAndroid = /Android/i.test(ua);
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
-  if(isAndroid){ let i=0; function next(){ if(i>=pref.length){ window.location.href = generic; return; } const key=pref[i++]; const pkg=PACK[key]; if(!pkg){ next(); return; } const intent = `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`; window.location.href = intent; setTimeout(next,1200);} next(); }
-  else if(isIOS){ window.location.href = generic; } else { alert('Open on mobile to pay via UPI.'); }
+  if(isAndroid){
+    let i = 0;
+    function next(){
+      if(i >= pref.length){ window.location.href = generic; return; }
+      const key = pref[i++]; const pkg = PACK[key];
+      if(!pkg){ next(); return; }
+      const intent = `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`;
+      window.location.href = intent;
+      setTimeout(next, 1200);
+    }
+    next();
+  } else if(isIOS){
+    window.location.href = generic;
+  } else {
+    alert('Open this page on a mobile device to complete the UPI payment.');
+  }
 }
-
 document.getElementById('btnPaytm').addEventListener('click', ()=>openChain(['paytm','phonepe','gpay']));
 document.getElementById('btnGpay').addEventListener('click', ()=>openChain(['gpay','phonepe','paytm']));
 document.getElementById('btnPhonePe').addEventListener('click', ()=>openChain(['phonepe','paytm','gpay']));
 document.getElementById('btnOther').addEventListener('click', ()=>{ window.location.href = 'upi://pay?pa='+encodeURIComponent(ADMIN.upi)+'&pn='+encodeURIComponent(ADMIN.payeeName)+'&cu=INR'; });
 
-// Contact
+/* Contact */
 contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
 
-// toast
-function showToast(msg){ const t=document.createElement('div'); t.textContent=msg; t.style.position='fixed'; t.style.left='50%'; t.style.bottom='22px'; t.style.transform='translateX(-50%)'; t.style.background='rgba(11,97,255,0.95)'; t.style.color='#fff'; t.style.padding='8px 12px'; t.style.borderRadius='8px'; t.style.boxShadow='0 8px 20px rgba(11,97,255,0.12)'; t.style.zIndex=9999; document.body.appendChild(t); setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000); }
+/* small toast */
+function showToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.position='fixed'; t.style.left='50%'; t.style.bottom='22px'; t.style.transform='translateX(-50%)';
+  t.style.background='rgba(11,97,255,0.95)'; t.style.color='#fff'; t.style.padding='8px 12px';
+  t.style.borderRadius='8px'; t.style.boxShadow='0 8px 20px rgba(11,97,255,0.12)'; t.style.zIndex=9999;
+  document.body.appendChild(t);
+  setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
+}
 
-// ensure initial image shows a fallback if remote fails
+/* fallback if QR fails to load */
 qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
 
 </script>
