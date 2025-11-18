@@ -149,19 +149,22 @@
 <script>
 /* ================== ADMIN CONFIG (Edit these values) ================== */
 const ADMIN_CONFIG = {
-  upi: 'merchant@upi',                // UPI id shown and used for payment
-  payeeName: 'Merchant Name',         // payee name (pn)
-  defaultAmount: '50.00',             // default amount
-  qrImage: 'https://via.placeholder.com/600?text=QR+Code', // default 1:1 image (admin can change)
-  carouselImages: [                   // images for carousel (4 or 5)
-    'https://via.placeholder.com/800x400?text=Step+1',
-    'https://via.placeholder.com/800x400?text=Step+2',
-    'https://via.placeholder.com/800x400?text=Step+3',
-    'https://via.placeholder.com/800x400?text=Step+4'
+  // Demo UPI details (change to your real UPI before going live)
+  upi: 'demoupi@bank',                // UPI id shown and used for payment
+  payeeName: 'Demo Merchant',         // payee name (pn)
+  defaultAmount: '100.00',            // default amount
+  // QR image generated from a UPI URI (1:1) so scanning will open UPI apps
+  qrImage: 'https://chart.googleapis.com/chart?cht=qr&chs=600x600&chl=upi%3A%2F%2Fpay%3Fpa%3Ddemoupi%40bank%26pn%3DDemo%20Merchant%26am%3D100.00%26tn%3DOrder%26cu%3DINR',
+  // Carousel images (I picked some neutral, professional images)
+  carouselImages: [
+    'https://images.unsplash.com/photo-1521790366064-7986c2920212?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1542744094-24638eff58bb?auto=format&fit=crop&w=1200&q=80'
   ],
-  instructionsHtml: `1) Open a UPI app from buttons below. 2) Confirm UPI ID: <b>merchant@upi</b> and the amount. 3) After payment, take a screenshot and send it to admin for confirmation.`,
-  contactLink: 'https://wa.me/919999999999', // whatsapp or telegram link
-  contactText: 'Message admin on WhatsApp',
+  instructionsHtml: `1) Open any UPI app from the buttons below. 2) Confirm UPI ID: <b>demoupi@bank</b> and the amount (<b>₹100.00</b>). 3) Complete the payment and take a screenshot. 4) Send the screenshot to admin for confirmation.`,
+  contactLink: 'https://wa.me/919999999999', // demo whatsapp link (change to your number)
+  contactText: 'Contact Admin on WhatsApp',
   autoCarouselInterval: 2000 // milliseconds
 };
 /* ================== END ADMIN CONFIG ================== */
