@@ -204,9 +204,8 @@ function buildUpiUri(){
   return 'upi://pay?' + params.toString();
 }
 function initialQrSrc(){
-  const uri = buildUpiUri();
   // Use Google Chart API to generate QR (1000x1000 for quality)
-  return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
+  return `https://i.ibb.co/5xB9BHHt/1762552449.jpg`;
 }
 qrImg.src = initialQrSrc();
 
