@@ -1,0 +1,17 @@
+{
+  "name": "upi-pay-bot-server",
+  "version": "1.0.0",
+  "description": "UPI payment page + Telegram admin bot",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "express": "^4.18.2",
+    "telegraf": "^4.12.0"
+  }
+}
