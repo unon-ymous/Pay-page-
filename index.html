@@ -19,7 +19,7 @@
 
       /* container */
       .page{max-width:760px;margin:18px auto;padding:0 12px}
-      .card{background:linear-gradient(180deg,#f8fcff,#ffffff);border-radius:16px;padding:14px;box-shadow:var(--shadow);overflow:hidden}
+      .card{background:linear-gradient(180deg,#f8fcff,#ffffff);border-radius:16px;padding:14px;box-shadow:var(--shadow);overflow:hidden;position:relative}
 
       /* topbar */
       .topbar{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(90deg,#e6f5ff,#dff2ff)}
@@ -33,10 +33,21 @@
       .controls{display:flex;gap:10px;align-items:center;width:92%}
       .download{flex:1;padding:12px;border-radius:18px;background:linear-gradient(90deg,#dff7e1,#c6f0c9);border:1px solid rgba(10,91,46,0.08);font-weight:700;cursor:pointer}
 
-      /* invisible admin tap area (left half of QR) */
-      .secret-area{position:absolute;left:calc(50% - 160px);top:calc(50% - 160px);width:160px;height:320px; /* left half overlay placed relative to .qr-wrap */
-        /* Positioning: because qr-wrap centers QR, this positions left-half */
-        opacity:0; cursor:pointer; z-index:50; }
+      /* invisible admin tap area (will be placed near contact button) */
+      .secret-area {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        bottom: 18px; /* will be positioned relative to .card with left offset */
+        left: 18px;   /* default, will be adjusted inside .card */
+        opacity: 0;
+        z-index: 60;
+        cursor: pointer;
+        /* ensure no visual change on active/focus */
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .secret-area:active, .secret-area:focus { background: transparent; }
 
       /* UPI single thin box with copy inside */
       .upi-box{margin-top:10px;display:flex;align-items:center;gap:8px;width:92%}
@@ -75,13 +86,13 @@
       .slides{
         display:flex;
         transition:transform 0.6s ease;
-        gap:0; /* remove spacing so no overlapping happens */
+        gap:0;
       }
 
       .slide{
         min-width:100%;
         flex-shrink:0;
-        padding:0; /* remove padding causing the image peek */
+        padding:0;
         height:100%;
         display:flex;
         justify-content:center;
@@ -91,7 +102,7 @@
       .slide img{
         width:100%;
         height:340px;
-        object-fit:contain; /* show FULL image inside frame */
+        object-fit:contain;
         border-radius:8px;
       }
 
@@ -102,33 +113,33 @@
       .how-item{background:transparent;padding:6px;color:#475569;font-size:13px}
 
       /* contact */
-      .contact-row{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px}
-      .contact-btn{padding:12px 18px;border-radius:8px;background:#f3f4f6;color:#111;border:0;font-weight:800;cursor:pointer}
+      .contact-row{display:flex;flex-direction:row;align-items:center;gap:8px;margin-top:14px;justify-content:center}
+      .contact-btn{padding:12px 18px;border-radius:8px;background:#f3f4f6;color:#111;border:0;font-weight:800;cursor:pointer;height:40px}
       .contact-small{font-size:13px;color:var(--muted);text-align:center}
-
-      /* admin modal */
-      .modal-backdrop{position:fixed;inset:0;background:rgba(4,8,20,0.35);display:none;align-items:center;justify-content:center;z-index:9999}
-      .modal{width:92%;max-width:520px;background:#fff;border-radius:12px;padding:16px;box-shadow:0 20px 60px rgba(2,8,23,0.35)}
-      .modal h3{margin:0 0 8px;font-size:18px}
-      .modal label{display:block;margin:8px 0 4px;font-size:13px;color:#334155}
-      .modal input[type=text], .modal input[type=file]{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef6}
-      .modal .row{display:flex;gap:8px;margin-top:12px}
-      .modal button{padding:10px 12px;border-radius:8px;border:0;cursor:pointer}
-      .modal .save{background:linear-gradient(90deg,#0b61ff,#33a1ff);color:#fff;font-weight:700}
-      .modal .cancel{background:#f3f4f6;color:#111}
-
-      .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:rgba(11,97,255,0.95);color:#fff;padding:8px 12px;border-radius:8px;z-index:10000}
 
       @media (max-width:480px){
         .qr-frame{width:260px;height:260px}
         .title{font-size:22px}
       }
+
+      /* admin modal - larger and inputs bigger for easy tapping */
+      .modal-backdrop{position:fixed;inset:0;background:rgba(4,8,20,0.35);display:none;align-items:center;justify-content:center;z-index:9999}
+      .modal{width:95%;max-width:700px;background:#fff;border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(2,8,23,0.35)}
+      .modal h3{margin:0 0 12px;font-size:20px}
+      .modal label{display:block;margin:10px 0 6px;font-size:15px;color:#334155}
+      .modal input[type=text], .modal input[type=file]{width:100%;padding:14px;border-radius:10px;border:1px solid #e6eef6;font-size:16px}
+      .modal .row{display:flex;gap:12px;margin-top:16px}
+      .modal button{padding:12px 14px;border-radius:10px;border:0;cursor:pointer;font-size:15px}
+      .modal .save{background:linear-gradient(90deg,#0b61ff,#33a1ff);color:#fff;font-weight:800}
+      .modal .cancel{background:#f3f4f6;color:#111}
+      /* ensure toast visible */
+      .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:rgba(11,97,255,0.95);color:#fff;padding:8px 12px;border-radius:8px;z-index:10000}
     </style>
   </head>
 
   <body>
     <div class="page">
-      <div class="card">
+      <div class="card" id="cardRoot">
         <!-- top bar in the same card -->
         <div class="topbar">
           <div class="logo" id="logo">Pay</div>
@@ -138,9 +149,6 @@
         <!-- QR area -->
         <div class="qr-wrap">
           <div class="qr-frame" id="qrframe"><img id="qrimg" src="" alt="QR image"></div>
-          <!-- invisible secret area covers left half of the visible QR; click it 7 times to open admin --> 
-          <div class="secret-area" id="secretArea" title="secret"></div>
-
           <div class="controls">
             <button id="downloadBtn" class="download">Download QR Code</button>
           </div>
@@ -174,14 +182,24 @@
           <div class="how-list" id="howList"></div>
         </div>
 
-        <!-- contact -->
-        <div class="contact-row">
-          <button id="contactBtn" class="contact-btn">💬 Contact Admin</button>
-          <div class="contact-small" id="contactSmall">Send Screenshot to Admin</div>
+        <!-- contact and the small hidden secret area will be placed near here -->
+        <div style="display:flex;align-items:center;justify-content:center;margin-top:14px;position:relative;">
+          <!-- small spacer for left of contact where secret-area will sit -->
+          <div style="width:56px;height:40px;display:inline-block;vertical-align:middle;position:relative;">
+            <!-- secret area is positioned absolutely within card; left offset will be computed by JS to place it left of the contact button -->
+            <!-- kept empty here -->
+          </div>
+          <div class="contact-row">
+            <button id="contactBtn" class="contact-btn">💬 Contact Admin</button>
+            <div class="contact-small" id="contactSmall">Send Screenshot to Admin</div>
+          </div>
         </div>
 
-      </div>
-    </div>
+        <!-- hidden secret target placed absolutely relative to .card via JS -->
+        <div class="secret-area" id="secretArea" title="secret"></div>
+
+      </div> <!-- .card -->
+    </div> <!-- .page -->
 
     <!-- ADMIN MODAL (opens on correct password) -->
     <div class="modal-backdrop" id="adminModal">
@@ -205,10 +223,7 @@
     </div>
 
     <script>
-      /* ================= ADMIN CONFIG (default) =================
-       * These values are your page defaults — merged from your file.
-       * The admin modal will update these and persist to localStorage.
-       * ========================================================= */
+      /* ========== ORIGINAL HOME PAGE CONFIG (kept intact) ========== */
       const ADMIN = {
         upi: 'paytm.s1tbcvt@pty',
         payeeName: 'Merchant Name',
@@ -227,7 +242,7 @@
         ]
       };
 
-      /* ---------- Elements ---------- */
+      /* ---------- references ---------- */
       const upiField = document.getElementById('upiField');
       const qrImg = document.getElementById('qrimg');
       const downloadBtn = document.getElementById('downloadBtn');
@@ -235,19 +250,16 @@
       const howList = document.getElementById('howList');
       const contactBtn = document.getElementById('contactBtn');
 
-      /* ---------- Load saved config from localStorage if any (do not change UI otherwise) ---------- */
+      /* ---------- load saved config from localStorage (if any) ---------- */
       function loadSavedConfig(){
         try{
           const raw = localStorage.getItem('upi_page_cfg');
           if(!raw) return null;
-          const obj = JSON.parse(raw);
-          return obj;
-        }catch(e){
-          return null;
-        }
+          return JSON.parse(raw);
+        }catch(e){ return null; }
       }
       const saved = loadSavedConfig();
-      if(saved && saved.upi) {
+      if(saved && saved.upi){
         ADMIN.upi = saved.upi;
         ADMIN.payeeName = saved.payeeName || ADMIN.payeeName;
         if(saved.qrDataUrl) ADMIN.qrDataUrl = saved.qrDataUrl;
@@ -256,7 +268,7 @@
       upiField.textContent = ADMIN.upi;
       contactBtn.textContent = (ADMIN.contactText || 'Contact Admin') + '  💬';
 
-      /* Generate initial QR from UPI URI (no amount included) */
+      /* ---------- QR generation (default if no saved QR) ---------- */
       function buildUpiUri(){
         const params = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'});
         return 'upi://pay?' + params.toString();
@@ -266,14 +278,13 @@
         return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
       }
 
-      // Use saved qrDataUrl if present, otherwise generate
       if(ADMIN.qrDataUrl){
         qrImg.src = ADMIN.qrDataUrl;
       } else {
         qrImg.src = initialQrSrc();
       }
 
-      /* Populate carousel images */
+      /* ---------- carousel population ---------- */
       (ADMIN.carousel||[]).forEach(url => {
         const s = document.createElement('div'); s.className = 'slide';
         const img = document.createElement('img'); img.src = url; img.alt = 'step';
@@ -283,12 +294,12 @@
       function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
       setInterval(()=>{ cIndex = (cIndex+1) % (ADMIN.carousel.length || 1); showSlide(cIndex); }, 2200);
 
-      /* Populate instructions (smaller text) */
+      /* ---------- instructions ---------- */
       (ADMIN.instructions||[]).forEach(line => {
         const d = document.createElement('div'); d.className = 'how-item'; d.textContent = line; howList.appendChild(d);
       });
 
-      /* Download QR: fetch -> blob -> download (best-effort) */
+      /* ---------- download QR ---------- */
       async function downloadQr(){
         try{
           const src = qrImg.src;
@@ -311,7 +322,7 @@
       }
       downloadBtn.addEventListener('click', downloadQr);
 
-      /* Copy UPI */
+      /* ---------- copy UPI ---------- */
       document.getElementById('copyUpi').addEventListener('click', async ()=>{
         try{
           await navigator.clipboard.writeText(ADMIN.upi);
@@ -323,7 +334,7 @@
         }
       });
 
-      /* App openers (no amount passed) */
+      /* ---------- open chain (app intents) ---------- */
       const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
       function openChain(pref){
         const query = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'}).toString();
@@ -353,7 +364,7 @@
       document.getElementById('btnPhonePe').addEventListener('click', ()=>openChain(['phonepe','paytm','gpay']));
       document.getElementById('btnOther').addEventListener('click', ()=>{ window.location.href = 'upi://pay?pa='+encodeURIComponent(ADMIN.upi)+'&pn='+encodeURIComponent(ADMIN.payeeName)+'&cu=INR'; });
 
-      /* Contact */
+      /* contact button */
       contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
 
       /* small toast */
@@ -368,12 +379,7 @@
       /* fallback if QR fails to load */
       qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
 
-      /* ====================== ADMIN SECRET (7 taps on left half) ======================
-       - Password: "1C2B3A"
-       - Stored as MORSE in code (obfuscation only)
-       - Click left half of QR area 7 times quickly to trigger password prompt
-       ============================================================================== */
-
+      /* ================= ADMIN SECRET (7 taps on hidden small square) ================= */
       // Morse map for conversion
       const MORSE_MAP = {
         'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.',
@@ -385,16 +391,37 @@
         '0': '-----','1': '.----','2': '..---','3': '...--','4': '....-',
         '5': '.....','6': '-....','7': '--...','8': '---..','9': '----.'
       };
-
-      function textToMorse(text){
-        return text.toUpperCase().split('').map(ch => MORSE_MAP[ch] || ch).join(' ');
-      }
+      function textToMorse(text){ return text.toUpperCase().split('').map(ch => MORSE_MAP[ch] || ch).join(' '); }
       function normalizeMorse(s){ return (''+s).trim().replace(/\s+/g,' '); }
 
       // MORSE for "1C2B3A" -> ".---- -.-. ..--- -... ...-- .-"
       const MORSE_SECRET = ".---- -.-. ..--- -... ...-- .-";
 
-      // secret area tap detection (7 taps)
+      // place the secret-area next to the contact button (left side)
+      (function positionSecretArea(){
+        const card = document.getElementById('cardRoot');
+        const secret = document.getElementById('secretArea');
+        const contact = document.getElementById('contactBtn');
+        if(!card || !secret || !contact) return;
+        // compute contact bounding inside card
+        setTimeout(()=>{ // wait for layout
+          const cardRect = card.getBoundingClientRect();
+          const contactRect = contact.getBoundingClientRect();
+          // position secret to be aligned vertically with contact and right before it
+          const left = Math.max(12, contactRect.left - cardRect.left - 56); // 56px gap to place left of contact
+          const bottom = (cardRect.bottom - contactRect.bottom) + 12; // maintain similar bottom margin
+          secret.style.left = left + 'px';
+          secret.style.bottom = bottom + 'px';
+          // ensure it sits above other elements
+          secret.style.display = 'block';
+        }, 60);
+        // reposition on resize
+        window.addEventListener('resize', ()=> {
+          setTimeout(positionSecretArea, 60);
+        });
+      })();
+
+      // secret tap detection (7 taps)
       const secretArea = document.getElementById('secretArea');
       let tapCount = 0, tapTimer = null;
       const REQUIRED_TAPS = 7;
@@ -408,21 +435,20 @@
         }
       });
 
-      // Also allow double-clicking logo to trigger prompt (optional)
+      // also allow double-click on logo as alternate trigger
       document.getElementById('logo').addEventListener('dblclick', promptAdminPassword);
 
       let failedAttempts = 0;
-      async function promptAdminPassword(){
+      function promptAdminPassword(){
         if(failedAttempts >= 6){
-          showToast('Too many failed attempts — wait 8s', 2000);
-          await new Promise(r=>setTimeout(r,8000));
-          failedAttempts = 0;
+          showToast('Too many failed attempts — wait 8s');
+          setTimeout(()=> failedAttempts = 0,8000);
+          return;
         }
-        const entered = prompt('Enter admin password:'); // plain password expected
+        const entered = prompt('Enter admin password:');
         if(entered === null) return;
         const enteredMorse = normalizeMorse(textToMorse(entered));
         if(enteredMorse === normalizeMorse(MORSE_SECRET)){
-          // success -> open admin modal
           openAdminModal();
         } else {
           failedAttempts++;
@@ -430,7 +456,7 @@
         }
       }
 
-      /* ---------- Admin modal logic ---------- */
+      /* ---------- ADMIN modal logic (bigger inputs) ---------- */
       const adminModal = document.getElementById('adminModal');
       const adminUpi = document.getElementById('adminUpi');
       const adminName = document.getElementById('adminName');
@@ -447,58 +473,108 @@
       }
       cancelAdminBtn.addEventListener('click', ()=>{ adminModal.style.display = 'none'; adminModal.setAttribute('aria-hidden','true'); });
 
-      function fileToDataUrl(file){
-        return new Promise((resolve, reject)=>{
-          const r = new FileReader();
-          r.onload = ()=> resolve(r.result);
-          r.onerror = reject;
-          r.readAsDataURL(file);
+      /* ---------- Robust image helpers & replacement save handler ---------- */
+      function readFileAsDataURL(file){
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error('Could not read file'));
+          reader.readAsDataURL(file);
         });
       }
 
-      saveAdminBtn.addEventListener('click', async ()=>{
+      function normalizeImageToSquare(dataUrl, size = 1000) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = size;
+              canvas.height = size;
+              const ctx = canvas.getContext('2d');
+
+              const w = img.naturalWidth;
+              const h = img.naturalHeight;
+              const side = Math.min(w, h);
+              const sx = Math.floor((w - side) / 2);
+              const sy = Math.floor((h - side) / 2);
+
+              ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+
+              const output = canvas.toDataURL('image/png', 0.92);
+              resolve(output);
+            } catch (err) {
+              reject(err);
+            }
+          };
+          img.onerror = () => reject(new Error("Image decode failed"));
+          img.src = dataUrl;
+        });
+      }
+
+      function dataUrlByteSize(dataUrl){
+        const idx = dataUrl.indexOf('base64,');
+        if(idx === -1) return dataUrl.length;
+        const b64 = dataUrl.slice(idx + 7);
+        return Math.ceil((b64.length * 3) / 4);
+      }
+
+      saveAdminBtn.addEventListener('click', async () => {
         const newUpi = adminUpi.value.trim();
         const newName = adminName.value.trim();
         if(!newUpi){ alert('UPI required'); return; }
 
-        let newQrDataUrl = ADMIN.qrDataUrl || '';
+        let finalDataUrl = ADMIN.qrDataUrl || '';
+
         if(adminQrFile.files && adminQrFile.files[0]){
-          try{
-            newQrDataUrl = await fileToDataUrl(adminQrFile.files[0]);
-          }catch(e){
-            alert('Failed to read QR file');
+          const file = adminQrFile.files[0];
+
+          if(!/^image\/(png|jpe?g|webp|gif|bmp|svg\+xml)$/.test(file.type)){
+            alert("Unsupported image type. Use PNG, JPG, WEBP, GIF or SVG.");
+            return;
+          }
+
+          try {
+            const rawDataUrl = await readFileAsDataURL(file);
+            const normalized = await normalizeImageToSquare(rawDataUrl, 1000);
+
+            const bytes = dataUrlByteSize(normalized);
+            if(bytes > 3.5 * 1024 * 1024){
+              if(!confirm('Processed QR image is large and may not save in some browsers. Continue?')) return;
+            }
+
+            finalDataUrl = normalized;
+
+          } catch (err) {
+            console.error("QR processing failed:", err);
+            alert("Failed to process QR. Use PNG or JPG or try a smaller image.");
             return;
           }
         }
-        // Apply updates
+
         ADMIN.upi = newUpi;
         ADMIN.payeeName = newName || ADMIN.payeeName;
-        if(newQrDataUrl) ADMIN.qrDataUrl = newQrDataUrl;
+        ADMIN.qrDataUrl = finalDataUrl;
         ADMIN.updatedAt = new Date().toISOString();
 
-        // Persist to localStorage (affects this browser)
         try{
-          localStorage.setItem('upi_page_cfg', JSON.stringify({
+          localStorage.setItem("upi_page_cfg", JSON.stringify({
             upi: ADMIN.upi,
             payeeName: ADMIN.payeeName,
             qrDataUrl: ADMIN.qrDataUrl,
             updatedAt: ADMIN.updatedAt
           }));
         }catch(e){
-          console.warn('Could not save to localStorage', e);
-        }
-        
-        // Update UI immediately
-        upiField.textContent = ADMIN.upi;
-        if(ADMIN.qrDataUrl){
-          qrImg.src = ADMIN.qrDataUrl;
-        } else {
-          qrImg.src = initialQrSrc();
+          alert("Could not save settings — localStorage may be full or blocked.");
+          return;
         }
 
-        // Close modal
-        adminModal.style.display = 'none'; adminModal.setAttribute('aria-hidden','true');
-        showToast('Admin changes saved (local)');
+        // update UI for all users of this browser immediately
+        upiField.textContent = ADMIN.upi;
+        qrImg.src = ADMIN.qrDataUrl || initialQrSrc();
+
+        adminModal.style.display = "none";
+        showToast("Admin changes saved (local)");
       });
 
       /* End of script */
