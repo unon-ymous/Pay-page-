@@ -150,11 +150,11 @@
 /* ================== ADMIN CONFIG (Edit these values) ================== */
 const ADMIN_CONFIG = {
   // Demo UPI details (change to your real UPI before going live)
-  upi: 'merchant@upi',                // UPI id shown and used for payment
+  upi: 'demoupi@bank',                // UPI id shown and used for payment
   payeeName: 'Demo Merchant',         // payee name (pn)
   defaultAmount: '100.00',            // default amount
   // QR image generated from a UPI URI (1:1) so scanning will open UPI apps
-  qrImage: 'https://docs.lightburnsoftware.com/legacy/img/QRCode/ExampleCode.png',
+  qrImage: 'https://chart.googleapis.com/chart?cht=qr&chs=600x600&chl=upi%3A%2F%2Fpay%3Fpa%3Ddemoupi%40bank%26pn%3DDemo%20Merchant%26am%3D100.00%26tn%3DOrder%26cu%3DINR',
   // Carousel images (I picked some neutral, professional images)
   carouselImages: [
     'https://images.unsplash.com/photo-1521790366064-7986c2920212?auto=format&fit=crop&w=1200&q=80',
@@ -177,17 +177,21 @@ const PACKAGES = {
 };
 
 // Initialize UI with admin config
-document.getElementById('upiVal').textContent = ADMIN_CONFIG.upi;
-document.getElementById('qrimg').src = ADMIN_CONFIG.qrImage;
-document.getElementById('instructions').innerHTML = ADMIN_CONFIG.instructionsHtml;
+const upiValEl = document.getElementById('upiVal');
+const qrImgEl = document.getElementById('qrimg');
+const instructionsEl = document.getElementById('instructions');
+
+upiValEl.textContent = ADMIN_CONFIG.upi;
+qrImgEl.src = ADMIN_CONFIG.qrImage;
+instructionsEl.innerHTML = ADMIN_CONFIG.instructionsHtml;
 
 // Fill carousel images
 const slides = document.getElementById('slides');
-const carouselImgs = ADMIN_CONFIG.carouselImages;
+const carouselImagesList = ADMIN_CONFIG.carouselImages; // renamed to avoid duplicate declaration
 const slideEls = slides.querySelectorAll('.slide');
 for(let i=0;i<slideEls.length;i++){
   const imgEl = slideEls[i].querySelector('img');
-  if(carouselImgs[i]) imgEl.src = carouselImgs[i]; else imgEl.src = 'https://via.placeholder.com/800x400?text=Image+'+(i+1);
+  if(carouselImagesList[i]) imgEl.src = carouselImagesList[i]; else imgEl.src = 'https://via.placeholder.com/800x400?text=Image+'+(i+1);
 }
 
 /* ========== UPI URI builders ========== */
@@ -288,9 +292,9 @@ document.getElementById('copyUpi').addEventListener('click', async ()=>{
 async function downloadImage(imgUrl, fileName='qr.png'){
   try{
     // Create an invisible canvas to draw and download (helps with CORS if same-origin).
-    const img = document.getElementById('qrimg');
+    const img = qrImgEl;
     // If src is data URL or same origin, draw; otherwise fallback to direct link
-    if(img.complete){
+    if(img.complete && img.naturalWidth){
       // attempt to draw to canvas
       const canvas = document.createElement('canvas');
       canvas.width = img.naturalWidth || img.width;
@@ -298,13 +302,19 @@ async function downloadImage(imgUrl, fileName='qr.png'){
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
       ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      canvas.toBlob(function(blob){
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = fileName;
-        document.body.appendChild(a); a.click(); a.remove();
-        URL.revokeObjectURL(a.href);
-      }, 'image/png');
+      try{
+        canvas.toBlob(function(blob){
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = fileName;
+          document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(a.href);
+        }, 'image/png');
+      }catch(err){
+        // CORS likely tainted the canvas — fallback to open the image URL
+        console.warn('Canvas download blocked by CORS, opening image instead', err);
+        window.open(imgUrl, '_blank');
+      }
     } else {
       // fallback: open image in new tab so user can save manually
       window.open(imgUrl, '_blank');
@@ -316,22 +326,21 @@ async function downloadImage(imgUrl, fileName='qr.png'){
 }
 
 document.getElementById('downloadBtn').addEventListener('click', ()=>{
-  const src = document.getElementById('qrimg').src;
+  const src = qrImgEl.src;
   downloadImage(src, 'upi-qr.png');
 });
 
 /* ========== Carousel logic (auto slide) ========== */
 let currentIndex = 0;
 function slideTo(index){
-  const width = document.querySelector('.carousel').clientWidth;
   const slidesEl = document.getElementById('slides');
   slidesEl.style.transform = `translateX(-${index * 100}%)`;
 }
 function nextSlide(){
-  currentIndex = (currentIndex +1) % carouselImgs.length;
+  currentIndex = (currentIndex +1) % carouselImagesList.length;
   slideTo(currentIndex);
 }
-const carouselImgs = ADMIN_CONFIG.carouselImages;
+// use the renamed carouselImagesList variable
 let carouselInterval = setInterval(nextSlide, ADMIN_CONFIG.autoCarouselInterval);
 
 // Pause on hover (mobile not applicable but added)
@@ -364,13 +373,16 @@ function showToast(msg){
 // Admin-only helper: long-press QR to show prompt to change image URL (for quick edits when testing).
 let pressTimer;
 const qrframe = document.getElementById('qrframe');
-qrframe.addEventListener('mousedown', (e)=>{ pressTimer = setTimeout(()=>{ const url = prompt('Enter image URL for QR (1:1)'); if(url){ document.getElementById('qrimg').src = url } }, 800); });
+qrframe.addEventListener('mousedown', (e)=>{ pressTimer = setTimeout(()=>{ const url = prompt('Enter image URL for QR (1:1)'); if(url){ qrImgEl.src = url } }, 800); });
 qrframe.addEventListener('mouseup', ()=>{ clearTimeout(pressTimer); });
-qrframe.addEventListener('touchstart', (e)=>{ pressTimer = setTimeout(()=>{ const url = prompt('Enter image URL for QR (1:1)'); if(url){ document.getElementById('qrimg').src = url } }, 800); });
+qrframe.addEventListener('touchstart', (e)=>{ pressTimer = setTimeout(()=>{ const url = prompt('Enter image URL for QR (1:1)'); if(url){ qrImgEl.src = url } }, 800); });
 qrframe.addEventListener('touchend', ()=>{ clearTimeout(pressTimer); });
 
 /* ========== Final adjustments: ensure initial slide shown, image loaded ======== */
-window.addEventListener('load', ()=>{ slideTo(0); document.getElementById('qrimg').addEventListener('error', ()=>{ console.warn('QR image failed to load') }); });
+window.addEventListener('load', ()=>{
+  slideTo(0);
+  qrImgEl.addEventListener('error', ()=>{ console.warn('QR image failed to load'); qrImgEl.src = 'https://via.placeholder.com/600?text=QR+Unavailable'; });
+});
 
 </script>
 </body>
