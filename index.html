@@ -1,118 +1,374 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Pay by UPI</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pay Here — UPI Payment</title>
   <style>
-    body { font-family: system-ui, sans-serif; padding: 20px; }
-    button { padding: 12px 18px; margin: 8px; font-size: 16px; cursor: pointer; }
-    .small { font-size: 13px; color: #444; margin-top: 8px; }
+    /* ====== THEME / LAYOUT ====== */
+    :root{
+      --bg:#eef2f6; /* light greyish */
+      --card:#ffffff;
+      --muted:#8b95a3;
+      --accent:#0b61ff; /* primary accent */
+      --radius:14px;
+      --glass: rgba(255,255,255,0.6);
+      --shadow: 0 10px 30px rgba(12,20,40,0.08);
+      --gpay-gradient: linear-gradient(90deg,#fff 0%, #f8f8f8 40%, #fff 100%);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;color:#132033;background:var(--bg)}
+
+    /* Shimmer background motion */
+    .bg-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px;position:relative;overflow:hidden}
+    .shimmer{
+      position:absolute;inset:-20% -30% auto -30%;height:140%;background:linear-gradient(120deg, rgba(255,255,255,0.04), rgba(255,255,255,0.18), rgba(255,255,255,0.04));transform:skewX(-18deg);filter:blur(30px);opacity:0.9;animation:shiny 6s linear infinite;
+      pointer-events:none;mix-blend-mode:overlay;
+    }
+    @keyframes shiny{0%{transform:translateX(-120%) skewX(-18deg)}50%{transform:translateX(0) skewX(-18deg)}100%{transform:translateX(120%) skewX(-18deg)}}
+
+    /* Container */
+    .container{width:100%;max-width:440px;background:linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.96));border-radius:20px;padding:20px;box-shadow:var(--shadow);backdrop-filter: blur(6px);position:relative;z-index:2}
+
+    /* Header */
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand .logo{
+      width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#0b61ff,#33a1ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 6px 18px rgba(11,97,255,0.18)
+    }
+    .brand h1{margin:0;font-size:28px;font-style:italic;color:#0b3a66;letter-spacing:0.6px}
+
+    /* QR box */
+    .qr-box{margin-top:16px;background:linear-gradient(180deg,#fbfeff,#fff);border-radius:14px;padding:14px;border:1px solid rgba(15,23,42,0.06);display:flex;flex-direction:column;align-items:center}
+    .qr-frame{width:260px;height:260px;border-radius:12px;border:1px dashed rgba(10,20,40,0.06);display:grid;place-items:center;background:linear-gradient(180deg,#fff,#fbfdff);overflow:hidden}
+    .qr-frame img{width:100%;height:100%;object-fit:cover;display:block}
+    .qr-actions{width:100%;display:flex;justify-content:center;margin-top:12px}
+    .btn{padding:12px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn-download{background:linear-gradient(90deg,#dff7e1,#c6f0c9);color:#0a5b2e;border:1px solid rgba(10,91,46,0.08);width:90%}
+
+    /* UPI string box */
+    .upi-box{margin-top:14px;background:#fff;border-radius:12px;padding:10px;border:1px solid rgba(10,20,30,0.04);display:flex;align-items:center;gap:10px}
+    .upi-box .label{font-size:12px;color:var(--muted);min-width:34px}
+    .upi-val{flex:1;padding:8px 10px;border-radius:8px;background:#f7fafc;border:1px solid rgba(10,20,30,0.03);font-size:14px;color:#0d263b}
+    .copy-btn{background:linear-gradient(90deg,#0b61ff,#33a1ff);color:#fff;border-radius:8px;padding:8px 10px;border:0;cursor:pointer}
+
+    /* App grid */
+    .apps-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+    .paytm{background:linear-gradient(90deg,#e6f0ff,#cfe6ff);color:#003366}
+    .gpay{background:linear-gradient(90deg,#ffffff,#fff7ed);color:#111;border:1px solid rgba(0,0,0,0.06);box-shadow:0 6px 18px rgba(0,0,0,0.03)}
+    .phonepe{background:linear-gradient(90deg,#f3e9ff,#efe2ff);color:#3a0b66}
+    .otherupi{background:linear-gradient(90deg,#fff,#f4f3ff);color:#2f2d36}
+
+    /* How to send */
+    .section-title{margin-top:18px;font-weight:800;color:#111}
+    .how{margin-top:6px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid rgba(10,20,30,0.03)}
+
+    /* Carousel */
+    .carousel{margin-top:10px;overflow:hidden;border-radius:10px}
+    .slides{display:flex;gap:8px;transform:translateX(0);transition:transform 0.6s ease}
+    .slide{min-width:100%;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:12px}
+    .slide img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+
+    .instructions{margin-top:10px;font-size:14px;color:#334155}
+
+    /* Contact */
+    .contact{margin-top:14px;display:flex;gap:10px;align-items:center}
+    .contact .contact-btn{flex:1;padding:12px;border-radius:10px;background:#0b0b0b;color:#fff;font-weight:700;border:0;display:flex;align-items:center;justify-content:center;gap:8px}
+    .marquee{font-size:14px;color:#0b61ff;padding-left:8px}
+
+    /* Responsive tweaks */
+    @media (max-width:420px){
+      .qr-frame{width:220px;height:220px}
+      .container{padding:16px;border-radius:16px}
+      .brand h1{font-size:26px}
+    }
+
   </style>
 </head>
 <body>
-  <h2>Pay via UPI</h2>
+  <div class="bg-wrap">
+    <div class="shimmer" aria-hidden></div>
 
-  <!-- Buttons for specific apps -->
-  <button id="gpay">Pay with Google Pay</button>
-  <button id="phonepe">Pay with PhonePe</button>
-  <button id="paytm">Pay with Paytm</button>
+    <div class="container" role="main">
+      <div class="brand">
+        <div class="logo">Pay</div>
+        <h1 style="font-style:italic">Pay Here</h1>
+      </div>
 
-  <!-- Button to open chooser (any installed UPI app) -->
-  <button id="anyupi">Pay (Any UPI app)</button>
+      <!-- QR area -->
+      <div class="qr-box">
+        <div class="qr-frame" id="qrframe" title="QR / Image (1:1)">
+          <img id="qrimg" src="" alt="QR or image" />
+        </div>
+        <div class="qr-actions">
+          <button class="btn btn-download" id="downloadBtn">Download QR Code</button>
+        </div>
+      </div>
 
-  <div class="small" id="status">Replace VPA/amount in script. Test on mobile.</div>
+      <!-- UPI string box -->
+      <div class="upi-box">
+        <div class="label">UPI</div>
+        <div class="upi-val" id="upiVal">merchant@upi</div>
+        <button class="copy-btn" id="copyUpi">Copy</button>
+      </div>
 
-  <script>
-  // ====== Configuration - change these values to yours ======
-  const PAYEE_VPA = "merchant@upi";      // pa - payee UPI ID
-  const PAYEE_NAME = "Merchant Name";    // pn - payee name
-  const DEFAULT_AMOUNT = "50.00";        // am - amount in INR (string)
-  const TRANSACTION_NOTE = "Order 123";  // tn - transaction note
-  // ========================================================
+      <!-- App buttons -->
+      <div class="apps-grid">
+        <button class="app-btn paytm" id="btnPaytm">PAYTM</button>
+        <button class="app-btn gpay" id="btnGpay">G PAY</button>
+        <button class="app-btn phonepe" id="btnPhonePe">PHONE पे</button>
+        <button class="app-btn otherupi" id="btnOther">Other UPI Apps</button>
+      </div>
 
-  function makeUpiUri(amount = DEFAULT_AMOUNT) {
-    const params = new URLSearchParams({
-      pa: PAYEE_VPA,
-      pn: PAYEE_NAME,
-      am: amount,
-      tn: TRANSACTION_NOTE,
-      cu: "INR"
-    });
-    return "upi://pay?" + params.toString();
-  }
+      <!-- How to send title -->
+      <div class="section-title">How to send Correct Payment — Screenshot after your Payment</div>
 
-  // Generic attempt: try opening UPI URI (will present chooser on many devices)
-  function openUpiUri(uri) {
-    // On mobile browsers, setting location to the URI will try to open the app.
-    window.location.href = uri;
-  }
+      <!-- Carousel -->
+      <div class="carousel" aria-hidden="false">
+        <div class="slides" id="slides">
+          <div class="slide"><img src="" alt="step1"/></div>
+          <div class="slide"><img src="" alt="step2"/></div>
+          <div class="slide"><img src="" alt="step3"/></div>
+          <div class="slide"><img src="" alt="step4"/></div>
+        </div>
+      </div>
 
-  // Android-specific: use intent:// with package to target a specific app
-  // Format: intent://pay?{query}#Intent;scheme=upi;package={package};end
-  function makeIntentForPackage(packageName, amount = DEFAULT_AMOUNT) {
-    const query = new URLSearchParams({
-      pa: PAYEE_VPA,
-      pn: PAYEE_NAME,
-      am: amount,
-      tn: TRANSACTION_NOTE,
-      cu: "INR"
-    }).toString();
-    return `intent://pay?${query}#Intent;scheme=upi;package=${packageName};end`;
-  }
+      <!-- Instructions editable by admin -->
+      <div class="instructions" id="instructions">
+        1) Open the chosen UPI app. 2) Confirm the UPI ID and amount. 3) After payment, take a screenshot and send to admin.
+      </div>
 
-  // App package names (common)
-  const PACKAGES = {
-    gpay: "com.google.android.apps.nbu.paisa.user",
-    phonepe: "com.phonepe.app",
-    paytm: "net.one97.paytm"
+      <!-- Contact admin -->
+      <div class="contact">
+        <button class="contact-btn" id="contactBtn">Contact Admin 📩</button>
+        <div class="marquee" id="marquee">Need help? Click to contact admin ➜</div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+/* ================== ADMIN CONFIG (Edit these values) ================== */
+const ADMIN_CONFIG = {
+  upi: 'merchant@upi',                // UPI id shown and used for payment
+  payeeName: 'Merchant Name',         // payee name (pn)
+  defaultAmount: '50.00',             // default amount
+  qrImage: 'https://via.placeholder.com/600?text=QR+Code', // default 1:1 image (admin can change)
+  carouselImages: [                   // images for carousel (4 or 5)
+    'https://via.placeholder.com/800x400?text=Step+1',
+    'https://via.placeholder.com/800x400?text=Step+2',
+    'https://via.placeholder.com/800x400?text=Step+3',
+    'https://via.placeholder.com/800x400?text=Step+4'
+  ],
+  instructionsHtml: `1) Open a UPI app from buttons below. 2) Confirm UPI ID: <b>merchant@upi</b> and the amount. 3) After payment, take a screenshot and send it to admin for confirmation.`,
+  contactLink: 'https://wa.me/919999999999', // whatsapp or telegram link
+  contactText: 'Message admin on WhatsApp',
+  autoCarouselInterval: 2000 // milliseconds
+};
+/* ================== END ADMIN CONFIG ================== */
+
+// Packages for Android intent targeting
+const PACKAGES = {
+  gpay: 'com.google.android.apps.nbu.paisa.user',
+  phonepe: 'com.phonepe.app',
+  paytm: 'net.one97.paytm'
+};
+
+// Initialize UI with admin config
+document.getElementById('upiVal').textContent = ADMIN_CONFIG.upi;
+document.getElementById('qrimg').src = ADMIN_CONFIG.qrImage;
+document.getElementById('instructions').innerHTML = ADMIN_CONFIG.instructionsHtml;
+
+// Fill carousel images
+const slides = document.getElementById('slides');
+const carouselImgs = ADMIN_CONFIG.carouselImages;
+const slideEls = slides.querySelectorAll('.slide');
+for(let i=0;i<slideEls.length;i++){
+  const imgEl = slideEls[i].querySelector('img');
+  if(carouselImgs[i]) imgEl.src = carouselImgs[i]; else imgEl.src = 'https://via.placeholder.com/800x400?text=Image+'+(i+1);
+}
+
+/* ========== UPI URI builders ========== */
+function buildUpiUri({pa, pn, am, tn}){
+  const params = new URLSearchParams({pa, pn, am, tn, cu: 'INR'});
+  return 'upi://pay?' + params.toString();
+}
+
+function buildIntentUrl(packageName, query){
+  return `intent://pay?${query}#Intent;scheme=upi;package=${packageName};end`;
+}
+
+function getUpiData(){
+  return {
+    pa: ADMIN_CONFIG.upi,
+    pn: ADMIN_CONFIG.payeeName,
+    am: ADMIN_CONFIG.defaultAmount,
+    tn: 'Payment'
   };
+}
 
-  // Buttons
-  document.getElementById("anyupi").addEventListener("click", () => {
-    openUpiUri(makeUpiUri());
-  });
+/* ========== Button behaviors with fallback chains ========== */
+function openWithFallbacks(preferredApps){
+  // preferredApps: array of keys like ['paytm','phonepe','gpay']
+  const data = getUpiData();
+  const query = new URLSearchParams({pa:data.pa,pn:data.pn,am:data.am,tn:data.tn,cu:'INR'}).toString();
+  const generic = buildUpiUri(data);
+  const ua = navigator.userAgent || '';
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
 
-  document.getElementById("gpay").addEventListener("click", () => {
-    // Use Android intent for Google Pay; fallback to generic UPI URI
-    const intentUrl = makeIntentForPackage(PACKAGES.gpay);
-    // Attempt the intent first (works on Android Chrome). On iOS / desktop, fallback to UPI URI.
-    tryOpen(intentUrl, makeUpiUri());
-  });
-
-  document.getElementById("phonepe").addEventListener("click", () => {
-    const intentUrl = makeIntentForPackage(PACKAGES.phonepe);
-    tryOpen(intentUrl, makeUpiUri());
-  });
-
-  document.getElementById("paytm").addEventListener("click", () => {
-    const intentUrl = makeIntentForPackage(PACKAGES.paytm);
-    tryOpen(intentUrl, makeUpiUri());
-  });
-
-  // tryOpen: attempt intent URL then fallback URI
-  function tryOpen(primaryUrl, fallbackUrl) {
-    const ua = navigator.userAgent || "";
-    const isAndroid = /Android/i.test(ua);
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
-
-    if (isAndroid) {
-      // On Android Chrome, setting location to intent: works. For other browsers, fallback.
-      window.location.href = primaryUrl;
-      // As an extra safety net, also schedule the fallback after a short delay.
-      // Some browsers/OS block immediate fallbacks; still this is a pragmatic approach.
-      setTimeout(() => {
-        // If user is still on page, open generic UPI URI (could open chooser)
-        window.location.href = fallbackUrl;
-      }, 1200);
-    } else if (isIOS) {
-      // iOS: try generic UPI URI (apps that register it will open)
-      window.location.href = fallbackUrl;
-    } else {
-      // Desktop: show UPI string (copy user) or QR code (you can implement).
-      alert("Open this page on a mobile device to complete UPI payment. UPI URI:\n\n" + fallbackUrl);
+  if(isAndroid){
+    // Try each preferred app by setting location to intent URL
+    // We'll attempt sequentially with short delays
+    let attempted = 0;
+    function tryNext(){
+      if(attempted >= preferredApps.length){
+        // final fallback: open generic UPI chooser
+        window.location.href = generic;
+        return;
+      }
+      const key = preferredApps[attempted];
+      attempted++;
+      const pkg = PACKAGES[key];
+      if(!pkg){ tryNext(); return; }
+      const intentUrl = buildIntentUrl(pkg, query);
+      // Attempt intent. If app exists Chrome will open it. Otherwise, after delay, try next.
+      window.location.href = intentUrl;
+      setTimeout(tryNext, 1400);
     }
+    tryNext();
+  } else if(isIOS){
+    // iOS: try generic UPI scheme (apps that register will open)
+    window.location.href = generic;
+  } else {
+    alert('Open this page on a mobile device to complete UPI payment. Use the QR or copy the UPI string.');
   }
-  </script>
+}
+
+// Paytm button: preference -> Paytm -> PhonePe -> GPay -> generic
+document.getElementById('btnPaytm').addEventListener('click', ()=>{
+  openWithFallbacks(['paytm','phonepe','gpay']);
+});
+
+// GPay button: GPay -> PhonePe -> Paytm -> generic
+document.getElementById('btnGpay').addEventListener('click', ()=>{
+  openWithFallbacks(['gpay','phonepe','paytm']);
+});
+
+// PhonePe button: PhonePe -> Paytm -> GPay -> generic
+document.getElementById('btnPhonePe').addEventListener('click', ()=>{
+  openWithFallbacks(['phonepe','paytm','gpay']);
+});
+
+// Other UPI Apps: open generic chooser
+document.getElementById('btnOther').addEventListener('click', ()=>{
+  const data = getUpiData();
+  const generic = buildUpiUri(data);
+  // Just open generic UPI URI — system will show installed UPI apps
+  window.location.href = generic;
+});
+
+/* ========== Copy UPI to clipboard ========== */
+document.getElementById('copyUpi').addEventListener('click', async ()=>{
+  const text = ADMIN_CONFIG.upi;
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast('UPI copied to clipboard');
+  }catch(e){
+    // fallback
+    const tmp = document.createElement('textarea');
+    tmp.value = text;document.body.appendChild(tmp);tmp.select();document.execCommand('copy');tmp.remove();
+    showToast('UPI copied to clipboard');
+  }
+});
+
+/* ========== Download QR functionality ========== */
+async function downloadImage(imgUrl, fileName='qr.png'){
+  try{
+    // Create an invisible canvas to draw and download (helps with CORS if same-origin).
+    const img = document.getElementById('qrimg');
+    // If src is data URL or same origin, draw; otherwise fallback to direct link
+    if(img.complete){
+      // attempt to draw to canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      canvas.toBlob(function(blob){
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(a.href);
+      }, 'image/png');
+    } else {
+      // fallback: open image in new tab so user can save manually
+      window.open(imgUrl, '_blank');
+    }
+  }catch(err){
+    console.warn('Download failed, opening image instead', err);
+    window.open(imgUrl, '_blank');
+  }
+}
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const src = document.getElementById('qrimg').src;
+  downloadImage(src, 'upi-qr.png');
+});
+
+/* ========== Carousel logic (auto slide) ========== */
+let currentIndex = 0;
+function slideTo(index){
+  const width = document.querySelector('.carousel').clientWidth;
+  const slidesEl = document.getElementById('slides');
+  slidesEl.style.transform = `translateX(-${index * 100}%)`;
+}
+function nextSlide(){
+  currentIndex = (currentIndex +1) % carouselImgs.length;
+  slideTo(currentIndex);
+}
+const carouselImgs = ADMIN_CONFIG.carouselImages;
+let carouselInterval = setInterval(nextSlide, ADMIN_CONFIG.autoCarouselInterval);
+
+// Pause on hover (mobile not applicable but added)
+const carouselEl = document.querySelector('.carousel');
+carouselEl.addEventListener('mouseenter', ()=>{ clearInterval(carouselInterval); });
+carouselEl.addEventListener('mouseleave', ()=>{ carouselInterval = setInterval(nextSlide, ADMIN_CONFIG.autoCarouselInterval); });
+
+/* ========== Contact admin ========== */
+const contactBtn = document.getElementById('contactBtn');
+contactBtn.addEventListener('click', ()=>{
+  window.open(ADMIN_CONFIG.contactLink, '_blank');
+});
+// marquee click also opens
+document.getElementById('marquee').addEventListener('click', ()=>{ window.open(ADMIN_CONFIG.contactLink, '_blank'); });
+// set button text
+contactBtn.textContent = ADMIN_CONFIG.contactText;
+
+/* ========== Small utility Toast ========== */
+function showToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.position='fixed';t.style.left='50%';t.style.bottom='24px';t.style.transform='translateX(-50%)';
+  t.style.background='#0b61ff';t.style.color='#fff';t.style.padding='10px 14px';t.style.borderRadius='8px';t.style.boxShadow='0 8px 24px rgba(11,97,255,0.18)';t.style.zIndex=9999;fontWeight='600';
+  document.body.appendChild(t);
+  setTimeout(()=>t.style.opacity='0.01',1800);
+  setTimeout(()=>t.remove(),2200);
+}
+
+/* ========== Accessibility & polish: allow admin to change QR by tapping frame (optional) ======== */
+// Admin-only helper: long-press QR to show prompt to change image URL (for quick edits when testing).
+let pressTimer;
+const qrframe = document.getElementById('qrframe');
+qrframe.addEventListener('mousedown', (e)=>{ pressTimer = setTimeout(()=>{ const url = prompt('Enter image URL for QR (1:1)'); if(url){ document.getElementById('qrimg').src = url } }, 800); });
+qrframe.addEventListener('mouseup', ()=>{ clearTimeout(pressTimer); });
+qrframe.addEventListener('touchstart', (e)=>{ pressTimer = setTimeout(()=>{ const url = prompt('Enter image URL for QR (1:1)'); if(url){ document.getElementById('qrimg').src = url } }, 800); });
+qrframe.addEventListener('touchend', ()=>{ clearTimeout(pressTimer); });
+
+/* ========== Final adjustments: ensure initial slide shown, image loaded ======== */
+window.addEventListener('load', ()=>{ slideTo(0); document.getElementById('qrimg').addEventListener('error', ()=>{ console.warn('QR image failed to load') }); });
+
+</script>
 </body>
 </html>
