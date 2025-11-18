@@ -215,6 +215,9 @@
         <label>Upload QR image (select from gallery / file)</label>
         <input id="adminQrFile" type="file" accept="image/*" />
 
+        <label style="margin-top:8px">Preview (will be saved)</label>
+        <img id="adminPreview" alt="QR preview" style="width:160px;height:160px;object-fit:cover;border-radius:10px;border:1px solid #e6eef6;display:block;margin-top:6px" />        
+
         <div class="row" style="justify-content:flex-end;margin-top:12px">
           <button class="cancel" id="cancelAdmin">Cancel</button>
           <button class="save" id="saveAdmin">Save</button>
@@ -473,111 +476,156 @@
       }
       cancelAdminBtn.addEventListener('click', ()=>{ adminModal.style.display = 'none'; adminModal.setAttribute('aria-hidden','true'); });
 
-      /* ---------- Robust image helpers & replacement save handler ---------- */
-      function readFileAsDataURL(file){
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error('Could not read file'));
-          reader.readAsDataURL(file);
-        });
-      }
+      /* ---------- Robust image processing + preview + save handler ---------- */
+const adminPreview = document.getElementById('adminPreview');
 
-      function normalizeImageToSquare(dataUrl, size = 1000) {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => {
-            try {
-              const canvas = document.createElement('canvas');
-              canvas.width = size;
-              canvas.height = size;
-              const ctx = canvas.getContext('2d');
+/* read file -> dataURL */
+function readFileAsDataURL(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(new Error('Could not read file'));
+    r.readAsDataURL(file);
+  });
+}
 
-              const w = img.naturalWidth;
-              const h = img.naturalHeight;
-              const side = Math.min(w, h);
-              const sx = Math.floor((w - side) / 2);
-              const sy = Math.floor((h - side) / 2);
+/* create Image() and wait for decode */
+function loadImage(dataUrl){
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => rej(new Error('Image decode failed'));
+    img.src = dataUrl;
+  });
+}
 
-              ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+/* draw center-cropped square and return canvas */
+function drawSquareCanvas(img, size){
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
 
-              const output = canvas.toDataURL('image/png', 0.92);
-              resolve(output);
-            } catch (err) {
-              reject(err);
-            }
-          };
-          img.onerror = () => reject(new Error("Image decode failed"));
-          img.src = dataUrl;
-        });
-      }
+  const w = img.naturalWidth, h = img.naturalHeight;
+  const side = Math.min(w,h);
+  const sx = Math.floor((w - side)/2), sy = Math.floor((h - side)/2);
+  ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+  return canvas;
+}
 
-      function dataUrlByteSize(dataUrl){
-        const idx = dataUrl.indexOf('base64,');
-        if(idx === -1) return dataUrl.length;
-        const b64 = dataUrl.slice(idx + 7);
-        return Math.ceil((b64.length * 3) / 4);
-      }
+/* compress canvas to dataURL; prefer PNG, fallback to JPEG with progressive quality */
+function compressCanvasToDataUrl(canvas, maxBytes){
+  // try PNG first
+  let dataUrl = canvas.toDataURL('image/png');
+  if(estimateDataUrlSize(dataUrl) <= maxBytes) return dataUrl;
+  // try JPEG qualities
+  const qualities = [0.92, 0.8, 0.7, 0.6, 0.5, 0.4];
+  for(const q of qualities){
+    dataUrl = canvas.toDataURL('image/jpeg', q);
+    if(estimateDataUrlSize(dataUrl) <= maxBytes) return dataUrl;
+  }
+  // return smallest we produced
+  return dataUrl;
+}
 
-      saveAdminBtn.addEventListener('click', async () => {
-        const newUpi = adminUpi.value.trim();
-        const newName = adminName.value.trim();
-        if(!newUpi){ alert('UPI required'); return; }
+/* approximate bytes for dataUrl */
+function estimateDataUrlSize(dataUrl){
+  const i = dataUrl.indexOf('base64,');
+  if(i === -1) return dataUrl.length;
+  const b64 = dataUrl.slice(i + 7);
+  return Math.ceil((b64.length * 3) / 4);
+}
 
-        let finalDataUrl = ADMIN.qrDataUrl || '';
+/* show preview in admin modal */
+function showAdminPreview(dataUrl){
+  if(!adminPreview) return;
+  adminPreview.src = dataUrl;
+}
 
-        if(adminQrFile.files && adminQrFile.files[0]){
-          const file = adminQrFile.files[0];
+/* Main save handler */
+saveAdminBtn.addEventListener('click', async () => {
+  const newUpi = adminUpi.value.trim();
+  const newName = adminName.value.trim();
+  if(!newUpi){ alert('UPI required'); return; }
 
-          if(!/^image\/(png|jpe?g|webp|gif|bmp|svg\+xml)$/.test(file.type)){
-            alert("Unsupported image type. Use PNG, JPG, WEBP, GIF or SVG.");
-            return;
-          }
+  let finalDataUrl = ADMIN.qrDataUrl || '';
 
-          try {
-            const rawDataUrl = await readFileAsDataURL(file);
-            const normalized = await normalizeImageToSquare(rawDataUrl, 1000);
+  // If a file chosen: validate, normalize, compress, preview first
+  if(adminQrFile.files && adminQrFile.files[0]){
+    const file = adminQrFile.files[0];
 
-            const bytes = dataUrlByteSize(normalized);
-            if(bytes > 3.5 * 1024 * 1024){
-              if(!confirm('Processed QR image is large and may not save in some browsers. Continue?')) return;
-            }
+    // Detect likely HEIC/unsupported
+    const unsupported = /heic|heif/i;
+    if(unsupported.test(file.type) || /\.heic$/i.test(file.name) || /\.heif$/i.test(file.name)){
+      alert('HEIC/HEIF images from some phones are not supported by browsers. Please convert the image to JPG/PNG (or take a screenshot) and retry.');
+      return;
+    }
 
-            finalDataUrl = normalized;
+    if(!/^image\/(png|jpe?g|webp|gif|bmp|svg\+xml)$/.test(file.type)){
+      // may still be okay (some browsers give empty type) — try read & decode and catch error below
+      // but warn user first
+      if(!confirm('The selected file has an uncommon image type. Try anyway?')) return;
+    }
 
-          } catch (err) {
-            console.error("QR processing failed:", err);
-            alert("Failed to process QR. Use PNG or JPG or try a smaller image.");
-            return;
-          }
-        }
+    try {
+      // 1) read
+      const rawDataUrl = await readFileAsDataURL(file);
 
-        ADMIN.upi = newUpi;
-        ADMIN.payeeName = newName || ADMIN.payeeName;
-        ADMIN.qrDataUrl = finalDataUrl;
-        ADMIN.updatedAt = new Date().toISOString();
+      // 2) ensure the image can decode (this will fail for HEIC, corrupted files)
+      const img = await loadImage(rawDataUrl);
 
-        try{
-          localStorage.setItem("upi_page_cfg", JSON.stringify({
-            upi: ADMIN.upi,
-            payeeName: ADMIN.payeeName,
-            qrDataUrl: ADMIN.qrDataUrl,
-            updatedAt: ADMIN.updatedAt
-          }));
-        }catch(e){
-          alert("Could not save settings — localStorage may be full or blocked.");
-          return;
-        }
+      // 3) draw center square and scale to size (use 800 for smaller output — safer for localStorage)
+      const canvas = drawSquareCanvas(img, 800);
 
-        // update UI for all users of this browser immediately
-        upiField.textContent = ADMIN.upi;
-        qrImg.src = ADMIN.qrDataUrl || initialQrSrc();
+      // 4) compress to target size (keep < 1.6 MB recommended). Try to stay under 1.6MB.
+      const MAX_BYTES = 1.6 * 1024 * 1024; // 1.6 MB
+      const compressed = compressCanvasToDataUrl(canvas, MAX_BYTES);
 
-        adminModal.style.display = "none";
-        showToast("Admin changes saved (local)");
-      });
+      // 5) preview to admin
+      showAdminPreview(compressed);
 
-      /* End of script */
+      // confirm with admin before saving (optional)
+      if(!confirm('Preview looks OK? Click OK to save and apply.')) return;
+
+      finalDataUrl = compressed;
+
+    } catch(err){
+      console.error('Image processing error', err);
+      alert('Could not decode/process this image. Try a JPG/PNG or take a screenshot and upload that.');
+      return;
+    }
+  }
+
+  // Apply updates
+  ADMIN.upi = newUpi;
+  ADMIN.payeeName = newName || ADMIN.payeeName;
+  ADMIN.qrDataUrl = finalDataUrl;
+  ADMIN.updatedAt = new Date().toISOString();
+
+  // Persist
+  try{
+    localStorage.setItem('upi_page_cfg', JSON.stringify({
+      upi: ADMIN.upi,
+      payeeName: ADMIN.payeeName,
+      qrDataUrl: ADMIN.qrDataUrl,
+      updatedAt: ADMIN.updatedAt
+    }));
+  }catch(e){
+    console.warn('save failed', e);
+    alert('Could not save to localStorage. Browser storage may be full or restricted. Try a smaller image or clear site data.');
+    return;
+  }
+
+  // Update UI
+  upiField.textContent = ADMIN.upi;
+  qrImg.src = ADMIN.qrDataUrl || initialQrSrc();
+
+  // close modal
+  adminModal.style.display = 'none';
+  adminModal.setAttribute('aria-hidden','true');
+
+  showToast('Saved. QR updated for this browser (local).');
+});    
+    
     </script>
   </body>
 </html>
