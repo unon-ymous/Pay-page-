@@ -49,11 +49,46 @@
 
     /* carousel + static header */
     .carousel-wrap{margin-top:12px}
-    .carousel-header{padding:8px;border-radius:8px;background:linear-gradient(180deg,#f5f7fa,#ffffff);border:1px solid rgba(8,12,20,0.04);color:#475569;font-weight:700;font-size:14px}
-    .carousel{margin-top:8px;overflow:hidden;border-radius:8px}
-    .slides{display:flex;transition:transform 0.6s ease}
-    .slide{min-width:100%;flex-shrink:0;padding:6px}
-    .slide img{width:100%;height:120px;object-fit:cover;border-radius:8px}
+
+.carousel-header{
+  padding:8px;
+  border-radius:8px;
+  background:linear-gradient(180deg,#f5f7fa,#ffffff);
+  border:1px solid rgba(8,12,20,0.04);
+  color:#475569;
+  font-weight:700;
+  font-size:14px;
+}
+
+.carousel{
+  margin-top:8px;
+  overflow:hidden;
+  border-radius:8px;
+  height:340px;
+}
+
+.slides{
+  display:flex;
+  transition:transform 0.6s ease;
+  gap:0; /* remove spacing so no overlapping happens */
+}
+
+.slide{
+  min-width:100%;
+  flex-shrink:0;
+  padding:0; /* remove padding causing the image peek */
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.slide img{
+  width:100%;
+  height:340px;
+  object-fit:contain; /* show FULL image inside frame */
+  border-radius:8px;
+}
 
     /* instructions in light shiny box (smaller text) */
     .instructions-box{margin-top:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#f8fbff,#ffffff);border:1px solid rgba(8,12,20,0.04);box-shadow:0 6px 18px rgba(11,97,255,0.03)}
@@ -101,26 +136,26 @@
       <div class="apps">
         <button id="btnPaytm" class="app-btn paytm">PAYTM</button>
         <button id="btnGpay" class="app-btn gpay">G PAY</button>
-        <button id="btnPhonePe" class="app-btn phonepe">PHONE पे</button>
-        <button id="btnOther" class="app-btn other">Other UPI Apps</button>
+        <button id="btnPhonePe" class="app-btn phonepe">Phone पे</button>
+        <button id="btnOther" class="app-btn other">Other Upi Apps</button>
       </div>
 
       <!-- carousel header (static) and carousel (images move) -->
       <div class="carousel-wrap">
-        <div class="carousel-header">How to send payment Screenshot</div>
+        <div class="carousel-header">📲  How to send Correct payment Screenshot</div>
         <div class="carousel"><div class="slides" id="slides"></div></div>
       </div>
 
       <!-- instructions -->
       <div class="instructions-box">
-        <div class="how-title">How to send Correct Payment — Screenshot after your Payment</div>
+        <div class="how-title">Instructions ❗ </div>
         <div class="how-list" id="howList"></div>
       </div>
 
       <!-- contact -->
       <div class="contact-row">
-        <button id="contactBtn" class="contact-btn">💬 Contact Admin</button>
-        <div class="contact-small" id="contactSmall">Message admin for order confirmation</div>
+        <button id="contactBtn" class="contact-btn"> Contact Admin</button>
+        <div class="contact-small" id="contactSmall">Send Screenshot to Admin</div>
       </div>
 
     </div>
@@ -137,9 +172,10 @@ const ADMIN = {
   contactText: 'Contact Admin',
   carousel: [
     // replace these with your tutorial images/screenshots
-    'https://images.unsplash.com/photo-1521790366064-7986c2920212?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=1200&q=80'
+    'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
+    'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
+    'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
+    
   ],
   instructions: [
     'Open any UPI app or scan the QR with your UPI app.',
@@ -158,7 +194,7 @@ const howList = document.getElementById('howList');
 const contactBtn = document.getElementById('contactBtn');
 
 upiField.textContent = ADMIN.upi;
-contactBtn.textContent = '💬 ' + (ADMIN.contactText || 'Contact Admin');
+contactBtn.textContent = (ADMIN.contactText || 'Contact Admin') + '  💬';
 
 /* Generate initial QR from UPI URI (no amount included so user enters in app) */
 function buildUpiUri(){
@@ -243,7 +279,8 @@ function openChain(pref){
       setTimeout(next, 1200);
     }
     next();
-  } else if(isIOS){
+  } else   } else if(isIOS){
+if(isIOS){
     window.location.href = generic;
   } else {
     alert('Open this page on a mobile device to complete the UPI payment.');
