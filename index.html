@@ -2,9 +2,9 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Pay Here — UPI Payment</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pay Here — UPI Payment</title>
   <style>
     :root{
       --page-bg:#eef6fb;
@@ -40,13 +40,13 @@
     .upi-text{font-size:15px;color:#0b1f2f}
     .copy-btn{padding:6px 10px;border-radius:8px;background:var(--copy-gray);color:#425066;border:0;cursor:pointer;font-weight:700}
 
-    /* apps - slightly darker than before */
+    /* apps (slightly darker than before as requested) */
     .apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(2,6,23,0.04)}
-    .paytm{background:linear-gradient(90deg,#dfe9ff,#cfe0ff);color:#002a55}
-    .gpay{background:linear-gradient(90deg,#fff8ef,#fff4e6);color:#111;border:1px solid rgba(0,0,0,0.06)}
-    .phonepe{background:linear-gradient(90deg,#efdeff,#e8dbff);color:#2b0752}
-    .other{background:linear-gradient(90deg,#d0c6ff,#c6b9ff);color:#221f3a} /* darker */
+    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow: 0 3px 8px rgba(2,6,23,0.03)}
+    .paytm{background:linear-gradient(90deg,#dbe9ff,#c3dbff);color:#012b4a}
+    .gpay{background:linear-gradient(90deg,#fffaf0,#fff7ed);color:#0b0b0b;border:1px solid rgba(0,0,0,0.08)}
+    .phonepe{background:linear-gradient(90deg,#eadcff,#e6dbff);color:#2b0050}
+    .other{background:linear-gradient(90deg,#cec8ff,#c4b9ff);color:#0d0b1a} /* darker */
 
     /* carousel + static header */
     .carousel-wrap{margin-top:12px}
@@ -102,40 +102,47 @@
     .contact-btn{padding:12px 18px;border-radius:8px;background:#f3f4f6;color:#111;border:0;font-weight:800;cursor:pointer}
     .contact-small{font-size:13px;color:var(--muted);text-align:center}
 
+    /* hidden admin touch area (invisible but clickable) */
+    .admin-hotspot{
+      position:fixed;
+      left:18px; /* near contact admin area as requested */
+      bottom:18px;
+      width:56px;
+      height:56px;
+      opacity:0; /* invisible */
+      z-index:99999;
+      /* keep pointer events enabled so it can be tapped */
+      cursor:pointer;
+    }
+
+    /* modal styles (password prompt and admin panel) */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(2,6,23,0.45); display:flex; align-items:center; justify-content:center; z-index:100000;
+    }
+    .modal{
+      width:92%;
+      max-width:480px;
+      background:#fff;
+      border-radius:12px;
+      box-shadow:0 20px 60px rgba(2,6,23,0.25);
+      padding:18px;
+    }
+    .modal h3{margin:0 0 8px 0;font-size:18px;color:#082034}
+    .modal .field{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+    .modal input[type="text"], .modal input[type="password"]{
+      padding:10px;border-radius:8px;border:1px solid rgba(8,12,20,0.06);font-size:14px;
+    }
+    .modal .row{display:flex;gap:8px;margin-top:12px}
+    .btn{padding:10px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:800}
+    .btn.primary{background:var(--accent);color:#fff}
+    .btn.ghost{background:#f3f4f6;color:#0b1622}
+
     @media (max-width:480px){
       .qr-frame{width:260px;height:260px}
       .title{font-size:22px}
     }
-
-    /* ---- Admin modal styles (hidden by default) ---- */
-    .admin-modal-backdrop{
-      position:fixed;inset:0;background:rgba(5,8,20,0.45);display:none;align-items:center;justify-content:center;z-index:9998;
-    }
-    .admin-modal{
-      width:92%;max-width:720px;border-radius:12px;background:#fff;padding:16px;box-shadow:0 30px 80px rgba(2,6,23,0.35);
-      transform:translateY(0);max-height:88vh;overflow:auto;
-    }
-    .admin-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-    .admin-title{font-weight:900;font-size:18px}
-    .admin-row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-    .admin-input{padding:10px;border-radius:8px;border:1px solid rgba(8,12,20,0.06);font-size:14px}
-    .admin-actions{display:flex;gap:8px;justify-content:flex-end}
-    .btn{padding:10px 12px;border-radius:10px;border:0;font-weight:800;cursor:pointer}
-    .btn-primary{background:linear-gradient(90deg,#0b61ff,#2189ff);color:#fff}
-    .btn-ghost{background:#f3f4f6;color:#111}
-
-    /* preview */
-    .preview{width:160px;height:160px;border-radius:8px;background:#f7fafc;border:1px dashed rgba(8,12,20,0.04);display:grid;place-items:center;overflow:hidden}
-    .preview img{width:100%;height:100%;object-fit:contain;display:block}
-
-    /* hidden tap area - invisible but clickable */
-    #secretTap{
-      position:fixed;left:12px;bottom:12px;width:48px;height:48px;opacity:0;z-index:9999;border-radius:8px; /* invisible */
-      /* no pointer-events:none — it must accept taps */
-    }
   </style>
 </head>
-
 <body>
   <div class="page">
     <div class="card">
@@ -190,58 +197,61 @@
     </div>
   </div>
 
-  <!-- invisible secret tap area (bottom-left) -->
-  <div id="secretTap" title="secret"></div>
+  <!-- Invisible hotspot for admin unlock (bottom-left near contact button) -->
+  <div id="adminHotspot" class="admin-hotspot" title="hidden admin hotspot"></div>
 
-  <!-- Admin modal (hidden by default) -->
-  <div id="adminBackdrop" class="admin-modal-backdrop" aria-hidden="true">
-    <div class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
-      <div class="admin-header">
-        <div class="admin-title" id="adminTitle">Admin Panel</div>
-        <div style="font-size:13px;color:#667085">Protected area</div>
-      </div>
-
-      <div class="admin-row">
-        <label style="font-weight:800">ImgBB API Key (required for image uploads)</label>
-        <input id="imgbbKey" class="admin-input" placeholder="Paste your ImgBB API key here (keeps in localStorage)">
-        <div style="font-size:12px;color:#6b7280">You can get a key from <strong>https://api.imgbb.com/</strong>. The key is stored only in your browser's localStorage (not sent elsewhere except to ImgBB when uploading).</div>
-      </div>
-
-      <div class="admin-row" style="flex-direction:row;gap:12px;align-items:flex-start">
-        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-          <label style="font-weight:800">Change UPI ID</label>
-          <input id="adminUpi" class="admin-input" placeholder="merchant@upi">
+  <!-- Password prompt modal (hidden) -->
+  <div id="pwModal" style="display:none;">
+    <div class="modal-backdrop" id="pwBackdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pwTitle">
+        <h3 id="pwTitle">Enter Admin Password</h3>
+        <div class="field">
+          <input id="pwInput" type="password" placeholder="Password" />
         </div>
-        <div style="width:180px;display:flex;flex-direction:column;gap:6px;align-items:center">
-          <div style="font-weight:800">QR Preview</div>
-          <div class="preview" id="qrPreview"><img id="qrPreviewImg" src="" alt="preview"></div>
+        <div class="row" style="justify-content:flex-end;">
+          <button id="pwCancel" class="btn ghost">Cancel</button>
+          <button id="pwSubmit" class="btn primary">Unlock</button>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="admin-row">
-        <label style="font-weight:800">Upload QR image from device (optional)</label>
-        <input id="qrFile" type="file" accept="image/*" class="admin-input">
-        <div style="font-size:13px;color:#6b7280">If you upload a file, it'll be sent to ImgBB (requires the API key above). After upload the returned public URL will be used as the QR image for all users.</div>
-      </div>
+  <!-- Admin panel modal (hidden) -->
+  <div id="adminModal" style="display:none;">
+    <div class="modal-backdrop" id="adminBackdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+        <h3 id="adminTitle">Admin Panel</h3>
+        <div style="color:#475569;font-size:13px;">Change QR image URL and UPI ID below. Click Save to apply.</div>
 
-      <div class="admin-actions">
-        <button id="adminCancel" class="btn btn-ghost">Cancel</button>
-        <button id="adminSave" class="btn btn-primary">Save & Apply</button>
+        <div class="field">
+          <label style="font-weight:700;font-size:13px;margin-top:10px">QR image URL</label>
+          <input id="adminQrUrl" type="text" placeholder="https://i.example.com/qr.png" />
+        </div>
+
+        <div class="field">
+          <label style="font-weight:700;font-size:13px;margin-top:10px">UPI ID</label>
+          <input id="adminUpi" type="text" placeholder="merchant@upi" />
+        </div>
+
+        <div class="row" style="justify-content:flex-end;">
+          <button id="adminCancel" class="btn ghost">Cancel</button>
+          <button id="adminSave" class="btn primary">Save</button>
+        </div>
       </div>
     </div>
   </div>
 
 <script>
 /* ================= ADMIN CONFIG =================
- * Change the values below to your real UPI, payee name and contact link.
+ * Default values (you can change here if you want)
  * ================================================= */
 const ADMIN = {
-  upi: localStorage.getItem('ADMIN_UPI') || 'merchant@upi',                // <-- stored value (falls back to default)
+  upi: 'merchant@upi',                // <-- your default UPI ID
   payeeName: 'Merchant Name',         // <-- payee name
   contactLink: 'https://wa.me/919999999999', // <-- your WhatsApp/Telegram link
   contactText: 'Contact Admin',
   carousel: [
-    // leave these the same as your original links
+    // replace these with your tutorial images/screenshots
     'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
     'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
     'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
@@ -251,40 +261,43 @@ const ADMIN = {
     'Confirm the UPI ID and payee name before approving.',
     'Enter the exact amount in your UPI app (do not rely on defaults).',
     'After payment, take a screenshot and send it to admin for confirmation.'
-  ]
+  ],
+  // Optional: current QR image source (initially generated from UPI URI)
+  qrImageUrl: null
 };
 /* ================================================= */
 
+/* Elements */
 const upiField = document.getElementById('upiField');
 const qrImg = document.getElementById('qrimg');
 const downloadBtn = document.getElementById('downloadBtn');
 const slidesEl = document.getElementById('slides');
 const howList = document.getElementById('howList');
 const contactBtn = document.getElementById('contactBtn');
+const contactSmall = document.getElementById('contactSmall');
 
+/* Set initial UI text */
 upiField.textContent = ADMIN.upi;
 contactBtn.textContent = (ADMIN.contactText || 'Contact Admin') + '  💬';
+contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
 
-/* Generate initial QR from UPI URI (no amount included so user enters in app) */
-function buildUpiUri(upi){
-  const params = new URLSearchParams({pa:upi,pn:ADMIN.payeeName,cu:'INR'});
+/* Build UPI URI for generating QR (if no external QR image is set) */
+function buildUpiUri(){
+  const params = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'});
   return 'upi://pay?' + params.toString();
 }
-function initialQrSrcFromUri(upi){
-  const uri = buildUpiUri(upi);
-  // Use Google Chart API to generate QR (1000x1000 for quality)
+function initialQrSrc(){
+  // if ADMIN.qrImageUrl is set (non-null), use it; otherwise use generated Google Chart QR
+  if(ADMIN.qrImageUrl){
+    return ADMIN.qrImageUrl;
+  }
+  const uri = buildUpiUri();
   return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
 }
+/* Set initial QR image */
+qrImg.src = initialQrSrc();
 
-/* If a custom uploaded QR URL exists in localStorage, prefer it (so updates persist across reloads) */
-const storedQrUrl = localStorage.getItem('ADMIN_QR_URL');
-if(storedQrUrl){
-  qrImg.src = storedQrUrl;
-} else {
-  qrImg.src = initialQrSrcFromUri(ADMIN.upi);
-}
-
-/* Populate carousel images (unchanged) */
+/* Populate carousel images */
 ADMIN.carousel.forEach(url => {
   const s = document.createElement('div'); s.className = 'slide';
   const img = document.createElement('img'); img.src = url; img.alt = 'step';
@@ -365,8 +378,7 @@ document.getElementById('btnGpay').addEventListener('click', ()=>openChain(['gpa
 document.getElementById('btnPhonePe').addEventListener('click', ()=>openChain(['phonepe','paytm','gpay']));
 document.getElementById('btnOther').addEventListener('click', ()=>{ window.location.href = 'upi://pay?pa='+encodeURIComponent(ADMIN.upi)+'&pn='+encodeURIComponent(ADMIN.payeeName)+'&cu=INR'; });
 
-/* Contact */
-contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
+/* Contact button already wired above */
 
 /* small toast */
 function showToast(msg){
@@ -382,165 +394,127 @@ function showToast(msg){
 /* fallback if QR fails to load */
 qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
 
-/* ----------------- Hidden/Secret tap logic ----------------- */
-const secretTap = document.getElementById('secretTap');
-let tapCount = 0;
-let lastTapTime = 0;
-const SECRET_REQUIRED = 10;
-const SECRET_PASS = 'fassvord'; // per your request
+/* ================= Hidden admin unlock logic =================
+ * - Invisible hotspot at bottom-left (adminHotspot)
+ * - Tap/click 10 times to open password modal
+ * - Password is "fassvord"
+ * - On correct password, open admin panel modal
+ * - Admin panel accepts QR image URL and UPI ID; Save updates the page immediately
+ * ============================================================= */
 
-secretTap.addEventListener('click', () => {
-  const now = Date.now();
-  // reset if too slow (10s)
-  if(now - lastTapTime > 10000) tapCount = 0;
-  lastTapTime = now;
-  tapCount++;
-  // subtle visual debug (disabled by default - we don't change UI): console.log('secret tap', tapCount);
-  if(tapCount >= SECRET_REQUIRED){
-    tapCount = 0;
-    promptForPass();
+const hotspot = document.getElementById('adminHotspot');
+const pwModal = document.getElementById('pwModal');
+const adminModal = document.getElementById('adminModal');
+const pwInput = document.getElementById('pwInput');
+const pwSubmit = document.getElementById('pwSubmit');
+const pwCancel = document.getElementById('pwCancel');
+const adminQrUrl = document.getElementById('adminQrUrl');
+const adminUpi = document.getElementById('adminUpi');
+const adminSave = document.getElementById('adminSave');
+const adminCancel = document.getElementById('adminCancel');
+const pwBackdrop = document.getElementById('pwBackdrop');
+const adminBackdrop = document.getElementById('adminBackdrop');
+
+let clickCount = 0;
+const REQUIRED_TAPS = 10;
+const ADMIN_PASSWORD = 'fassvord';
+
+/* Increment on each tap/click */
+hotspot.addEventListener('click', (e)=>{
+  clickCount++;
+  // small visual debug can be enabled by console
+  // console.log('admin hotspot clicks', clickCount);
+  if(clickCount >= REQUIRED_TAPS){
+    clickCount = 0; // reset
+    openPasswordModal();
   }
 });
 
-function promptForPass(){
-  const p = prompt('Enter admin password:');
-  if(p === SECRET_PASS){
-    openAdminModal();
-  } else {
-    if(p !== null) alert('Wrong password.');
-  }
+/* Show/hide helpers */
+function openPasswordModal(){
+  pwInput.value = '';
+  pwModal.style.display = 'block';
 }
-
-/* ----------------- Admin modal behavior ----------------- */
-const adminBackdrop = document.getElementById('adminBackdrop');
-const imgbbKeyInput = document.getElementById('imgbbKey');
-const adminUpiInput = document.getElementById('adminUpi');
-const qrFileInput = document.getElementById('qrFile');
-const qrPreviewImg = document.getElementById('qrPreviewImg');
-const adminSaveBtn = document.getElementById('adminSave');
-const adminCancelBtn = document.getElementById('adminCancel');
-
-// load stored values
-imgbbKeyInput.value = localStorage.getItem('IMGBB_API_KEY') || '';
-adminUpiInput.value = localStorage.getItem('ADMIN_UPI') || ADMIN.upi;
-qrPreviewImg.src = localStorage.getItem('ADMIN_QR_URL') || qrImg.src;
-
-// open/close
+function closePasswordModal(){
+  pwModal.style.display = 'none';
+}
 function openAdminModal(){
-  adminBackdrop.style.display = 'flex';
-  adminBackdrop.setAttribute('aria-hidden','false');
-  // populate inputs with current live values
-  imgbbKeyInput.value = localStorage.getItem('IMGBB_API_KEY') || '';
-  adminUpiInput.value = localStorage.getItem('ADMIN_UPI') || ADMIN.upi;
-  qrPreviewImg.src = localStorage.getItem('ADMIN_QR_URL') || qrImg.src;
+  // prefill admin modal fields with current values
+  adminQrUrl.value = ADMIN.qrImageUrl || ''; // if null, empty
+  adminUpi.value = ADMIN.upi || '';
+  adminModal.style.display = 'block';
 }
 function closeAdminModal(){
-  adminBackdrop.style.display = 'none';
-  adminBackdrop.setAttribute('aria-hidden','true');
+  adminModal.style.display = 'none';
 }
 
-// preview selected file
-qrFileInput.addEventListener('change', (e)=>{
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    qrPreviewImg.src = ev.target.result;
-  };
-  reader.readAsDataURL(f);
+/* Password modal actions */
+pwCancel.addEventListener('click', ()=>{
+  closePasswordModal();
+});
+pwBackdrop && pwBackdrop.addEventListener('click', (ev)=>{
+  // clicking backdrop (outside modal) closes password prompt
+  if(ev.target === pwBackdrop) closePasswordModal();
+});
+pwSubmit.addEventListener('click', ()=>{
+  const v = pwInput.value || '';
+  if(v === ADMIN_PASSWORD){
+    closePasswordModal();
+    openAdminModal();
+  } else {
+    showToast('Wrong password');
+  }
+});
+pwInput.addEventListener('keydown', (ev)=>{
+  if(ev.key === 'Enter') pwSubmit.click();
 });
 
-// Cancel
-adminCancelBtn.addEventListener('click', ()=>{
+/* Admin modal actions */
+adminCancel.addEventListener('click', ()=> closeAdminModal());
+adminBackdrop && adminBackdrop.addEventListener('click', (ev)=>{
+  if(ev.target === adminBackdrop) closeAdminModal();
+});
+
+/* Save changes from admin panel */
+adminSave.addEventListener('click', ()=>{
+  const newQr = (adminQrUrl.value || '').trim();
+  const newUpi = (adminUpi.value || '').trim();
+
+  // Update UPI if provided
+  if(newUpi){
+    ADMIN.upi = newUpi;
+    upiField.textContent = ADMIN.upi;
+    showToast('UPI updated');
+  }
+
+  // Update QR image source:
+  // If admin provided a QR image URL, use it.
+  // If empty, revert to generating QR from the UPI (Google Chart API)
+  if(newQr){
+    ADMIN.qrImageUrl = newQr;
+    qrImg.src = newQr;
+    showToast('QR updated');
+  } else {
+    // clear external QR override
+    ADMIN.qrImageUrl = null;
+    qrImg.src = initialQrSrc();
+    showToast('QR set to generated UPI QR');
+  }
+
+  // Close admin panel after saving
   closeAdminModal();
 });
 
-// Save & Apply logic
-adminSaveBtn.addEventListener('click', async ()=>{
-  const newKey = imgbbKeyInput.value.trim();
-  const newUpi = adminUpiInput.value.trim() || ADMIN.upi;
-  const f = qrFileInput.files && qrFileInput.files[0];
-
-  // store the API key and UPI locally (so admin doesn't have to re-enter every time)
-  if(newKey) localStorage.setItem('IMGBB_API_KEY', newKey);
-  if(newUpi) localStorage.setItem('ADMIN_UPI', newUpi);
-
-  showToast('Applying changes...');
-
-  // update UPI immediately (will also be used if no file uploaded)
-  ADMIN.upi = newUpi;
-  upiField.textContent = newUpi;
-  localStorage.setItem('ADMIN_UPI', newUpi);
-
-  // If file provided -> upload to ImgBB, get returned 
-  if(f){
-    const apiKey = newKey || localStorage.getItem('IMGBB_API_KEY');
-    if(!apiKey){
-      alert('ImgBB API key is required to upload images. Paste your API key in the ImgBB API Key field and try again.');
-      return;
-    }
-    try{
-      // read file as base64
-      const base64 = await readFileAsDataURL(f);
-      // strip the data: prefix
-      const b64clean = base64.replace(/^data:.+;base64,/, '');
-      // Prepare form data
-      const fd = new FormData();
-      fd.append('image', b64clean);
-      // optional name param:
-      fd.append('name', 'upi-qr-' + Date.now());
-      // POST to ImgBB upload endpoint
-      const resp = await fetch('https://api.imgbb.com/1/upload?key=' + encodeURIComponent(apiKey), {
-        method: 'POST',
-        body: fd
-      });
-      const j = await resp.json();
-      if(j && j.success && j.data && j.data.display_url){
-        const uploadedUrl = j.data.display_url;
-        // save url persistently
-        localStorage.setItem('ADMIN_QR_URL', uploadedUrl);
-        // update QR shown on main page
-        qrImg.src = uploadedUrl;
-        qrPreviewImg.src = uploadedUrl;
-        showToast('QR uploaded & updated for all users');
-      } else {
-        console.error('ImgBB upload failed', j);
-        alert('ImgBB upload failed. Check API key and network. Response: ' + (j && j.error && j.error.message ? j.error.message : JSON.stringify(j)));
-      }
-    }catch(err){
-      console.error('Upload error', err);
-      alert('Upload failed: ' + err.message);
-    } finally {
-      closeAdminModal();
-    }
-  } else {
-    // no file uploaded; regenerate QR from new UPI using Google Chart API
-    localStorage.removeItem('ADMIN_QR_URL'); // remove custom QR URL if any
-    const newGenerated = initialQrSrcFromUri(ADMIN.upi);
-    qrImg.src = newGenerated;
-    qrPreviewImg.src = newGenerated;
-    showToast('UPI updated — QR regenerated');
-    closeAdminModal();
-  }
+/* Reset click count if user navigates away or after some idle time */
+let resetTimer = null;
+hotspot.addEventListener('click', ()=>{
+  if(resetTimer) clearTimeout(resetTimer);
+  resetTimer = setTimeout(()=>{ clickCount = 0; }, 4000); // reset after 4s idle
 });
 
-/* helper to read file as data URL */
-function readFileAsDataURL(file){
-  return new Promise((resolve,reject)=>{
-    const r = new FileReader();
-    r.onload = ()=>resolve(r.result);
-    r.onerror = e=>reject(e);
-    r.readAsDataURL(file);
-  });
-}
+/* Ensure that when ADMIN.upi changes, any functionality using ADMIN.upi reflects it (already used directly) */
 
-/* Close modal when clicking outside modal content */
-adminBackdrop.addEventListener('click', (e)=>{
-  if(e.target === adminBackdrop) closeAdminModal();
-});
-
-/* ----------------- End of admin code ----------------- */
-
+/* End of admin logic */
 </script>
 </body>
 </html>
