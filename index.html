@@ -14,7 +14,7 @@
       --shadow:0 10px 30px rgba(12,20,40,0.06);
       --light-gray:#f3f4f6;
       --copy-gray:#eef2f6;
-      --btn-darker-overlay: rgba(0,0,0,0.04);
+      --btn-darken: 0.92; /* multiply to make bg slightly darker visually */
     }
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--page-bg);color:#0f1724}
 
@@ -42,13 +42,15 @@
 
     /* apps */
     .apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 6px rgba(2,6,23,0.03)}
-    .app-btn img{width:18px;height:18px;display:inline-block;vertical-align:middle}
-    /* slightly darker look for buttons */
+    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+    /* Slightly darker variants */
     .paytm{background:linear-gradient(90deg,#dfe9ff,#cfe0ff);color:#003366}
-    .gpay{background:linear-gradient(90deg,#fffefc,#fff7ed);color:#111;border:1px solid rgba(0,0,0,0.06)}
-    .phonepe{background:linear-gradient(90deg,#eee3ff,#e8dbff);color:#3a0b66}
-    .other{background:linear-gradient(90deg,#f4f4f6,#ececec);color:#111} /* light gray */
+    .gpay{background:linear-gradient(90deg,#f8f8f8,#fff3e6);color:#111;border:1px solid rgba(0,0,0,0.06)}
+    .phonepe{background:linear-gradient(90deg,#eadcff,#e6dbff);color:#3a0b66}
+    .other{background:linear-gradient(90deg,#f0f0f0,#ececec);color:#121212;border:1px solid rgba(0,0,0,0.04)}
+
+    /* icon wrapper to keep logos consistent */
+    .app-icon{width:20px;height:20px;display:inline-block;vertical-align:middle}
 
     /* carousel + static header */
     .carousel-wrap{margin-top:12px}
@@ -72,11 +74,10 @@
 
     .slides{
       display:flex;
-      transition:transform 600ms cubic-bezier(.2,.8,.2,1);
+      transition:transform 0.6s ease;
       gap:0;
       height:100%;
       width:100%;
-      will-change: transform;
     }
 
     .slide{
@@ -96,7 +97,6 @@
       border-radius:8px;
     }
 
-    /* placeholder for empty carousel */
     .carousel-empty{
       display:flex;
       align-items:center;
@@ -130,7 +130,7 @@
 <body>
   <div class="page">
     <div class="card">
-      <!-- top bar -->
+      <!-- top bar in the same card -->
       <div class="topbar">
         <div class="logo">Pay</div>
         <div class="title">Pay Here</div>
@@ -144,7 +144,7 @@
         </div>
       </div>
 
-      <!-- UPI pill -->
+      <!-- UPI thin pill with copy -->
       <div class="upi-box">
         <div class="upi-pill">
           <div class="upi-text" id="upiField"></div>
@@ -152,34 +152,56 @@
         </div>
       </div>
 
-      <!-- App buttons with logos -->
+      <!-- App buttons (text + inline logo on right) -->
       <div class="apps">
         <button id="btnPaytm" class="app-btn paytm">
           PAYTM
-          <!-- Paytm svg (small) -->
-          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%23005ea6'/><text x='12' y='15' font-size='10' fill='white' font-family='Arial' text-anchor='middle' font-weight='700'>P</text></svg>" alt="paytm">
+          <!-- paytm-like mark (stylized P) -->
+          <span class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
+              <rect x="1.5" y="4" width="21" height="16" rx="3" fill="#0A5EFF"/>
+              <path d="M7 15.2h1.8v-6.4H7V15.2zM10.2 10.6c0 1.3 1.1 2 2.6 2 1.4 0 2.5-0.7 2.5-2V9.2H12.1v1.4c0 .4-.2.6-.5.6-.3 0-.5-.2-.5-.6V7.6H10V10.6z" fill="#fff"/>
+            </svg>
+          </span>
         </button>
 
         <button id="btnGpay" class="app-btn gpay">
           G PAY
-          <!-- Google Pay style: G colored 'G' -->
-          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 48 48'><circle cx='24' cy='24' r='22' fill='white'/><text x='24' y='30' font-size='22' text-anchor='middle' font-family='Arial' font-weight='700' fill='%231b73e8'>G</text></svg>" alt="gpay">
+          <!-- simplified GPay-style mark -->
+          <span class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img">
+              <path d="M12 7v3h5.5c-.2-1.1-1-2.1-2.5-2.9L12 7z" fill="#4285F4"/>
+              <path d="M7 12c0-.3.1-.6.2-.9L7 9l-3 2.5 3 2.5.2-1.6c-.1-.5-.2-1-.2-1.5z" fill="#EA4335"/>
+              <path d="M12 17c1.4 0 2.6-.5 3.6-1.3l-1.8-1.4C13.9 15 13 15.4 12 15.4c-2.3 0-4.2-1.2-5.2-3l-1.9 1.5C6 16 8.8 17 12 17z" fill="#34A853"/>
+              <path d="M17.6 5.9C16.3 4.8 14.3 4 12 4 8.8 4 6 5 4.1 7.3L6.3 9c1-1.5 2.9-2.5 5.7-2.5 1.5 0 2.8.3 3.9.9l2-1.7z" fill="#FBBC05"/>
+            </svg>
+          </span>
         </button>
 
         <button id="btnPhonePe" class="app-btn phonepe">
           Phone पे
-          <!-- PhonePe svg -->
-          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%233a0b66'/><text x='12' y='15' font-size='10' fill='white' font-family='Arial' text-anchor='middle' font-weight='700'>P</text></svg>" alt="phonepe">
+          <!-- phonepe-like mark -->
+          <span class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img">
+              <rect x="2" y="2" width="20" height="20" rx="4" fill="#6C3CE5"/>
+              <path d="M8 15.5h1.5V8H8v7.5zm3.2 0h1.5V10.2c0-1 .5-1.6 1.5-1.6 1 0 1.3.6 1.3 1.5v5.4H17V10c0-2-1.3-3-3.3-3-2 0-3 1-3 3v5.5z" fill="#fff"/>
+            </svg>
+          </span>
         </button>
 
         <button id="btnOther" class="app-btn other">
           Other UPI
-          <!-- UPI official small logo approximation (gray) -->
-          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%23e8e8ea'/><text x='12' y='15' font-size='10' fill='%23636a6f' font-family='Arial' text-anchor='middle' font-weight='700'>UPI</text></svg>" alt="upi">
+          <!-- neutral UPI mark -->
+          <span class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" role="img">
+              <rect x="1.5" y="3" width="21" height="18" rx="3" fill="#E6E6E6"/>
+              <path d="M6 12h12v2H6z" fill="#9CA3AF"/>
+            </svg>
+          </span>
         </button>
       </div>
 
-      <!-- carousel -->
+      <!-- carousel header (static) and carousel (images move) -->
       <div class="carousel-wrap">
         <div class="carousel-header">📲  How to send payment Screenshot</div>
         <div class="carousel" id="carouselRoot">
@@ -200,29 +222,33 @@
 
       <!-- contact -->
       <div class="contact-row">
-        <button id="contactBtn" class="contact-btn">Contact Admin</button>
+        <button id="contactBtn" class="contact-btn">💬 Contact Admin</button>
         <div class="contact-small" id="contactSmall">Send Screenshot to Admin</div>
       </div>
+
     </div>
   </div>
 
 <script>
 /*
-  INDEX.HTML:
-  - Uses hardcoded carousel images and contact link/text (below).
-  - Loads only `qrlink` and `upiid` from external config.js (cache-busted and polled).
+  BEHAVIOR:
+  - qrlink and upiid are read from external config.js ONLY.
+  - Carousel images, contact link/text are hardcoded here per your request.
+  - Config polling continues to sync qrlink/upiid.
 */
 
-/* ========== Hardcoded values (as requested) ========== */
-const CAROUSEL_IMAGES = [
-  "https://i.ibb.co/gFPbGzZH/20251118-155331.jpg",
-  "https://i.ibb.co/TBTd5S3p/20251118-160648.jpg",
-  "https://i.ibb.co/fVJnf9V7/20251118-153613.jpg"
+/* --- hardcoded carousel images + contact info (per your instruction) --- */
+const HARDCODED_CAROUSEL = [
+  'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
+  'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
+  'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg',
+  // add more static images here if you want them displayed
 ];
-const CONTACT_LINK = "https://wa.me/919999999999";
-const CONTACT_TEXT = "Contact Admin";
-/* ==================================================== */
 
+const HARDCODED_CONTACT_LINK = 'https://wa.me/919999999999';
+const HARDCODED_CONTACT_TEXT = 'Contact Admin';
+
+/* --- UI elements --- */
 const upiField = document.getElementById('upiField');
 const qrImg = document.getElementById('qrimg');
 const downloadBtn = document.getElementById('downloadBtn');
@@ -230,13 +256,11 @@ const slidesEl = document.getElementById('slides');
 const carouselRoot = document.getElementById('carouselRoot');
 const contactBtn = document.getElementById('contactBtn');
 const copyBtn = document.getElementById('copyUpi');
-
 let currentConfig = null;
 let configScriptEl = null;
 let carouselInterval = null;
-let autoStartTimeout = null;
 
-/* small toast */
+/* --- toast --- */
 function showToast(msg){
   const t = document.createElement('div');
   t.textContent = msg;
@@ -247,20 +271,66 @@ function showToast(msg){
   setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
 }
 
-/* Apply config (only qrlink and upiid come from external config.js) */
+/* --- carousel population (use HARDCODED_CAROUSEL) --- */
+function clearSlides(){ while(slidesEl.firstChild) slidesEl.removeChild(slidesEl.firstChild); const placeholder = carouselRoot.querySelector('.carousel-empty'); if(placeholder) placeholder.remove(); }
+
+function populateSlides(urls){
+  clearSlides();
+  urls.forEach(url => {
+    const s = document.createElement('div'); s.className = 'slide';
+    const img = document.createElement('img'); img.src = url; img.alt = 'step';
+    img.addEventListener('error', ()=> {
+      img.style.display = 'none';
+      const err = document.createElement('div');
+      err.style.width = '100%'; err.style.height = '100%'; err.style.display = 'flex';
+      err.style.alignItems = 'center'; err.style.justifyContent = 'center';
+      err.style.color = '#94a3b8'; err.style.fontWeight = 700;
+      err.textContent = 'Image unavailable';
+      s.appendChild(err);
+    });
+    s.appendChild(img);
+    slidesEl.appendChild(s);
+  });
+  if(urls.length === 0) showEmptyCarouselPlaceholder();
+}
+
+function showEmptyCarouselPlaceholder(){
+  clearSlides();
+  const ph = document.createElement('div');
+  ph.className = 'carousel-empty';
+  ph.textContent = 'No tutorial images configured';
+  carouselRoot.appendChild(ph);
+}
+
+let cIndex = 0;
+function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
+function startCarousel(len){
+  stopCarousel();
+  if(!len || len <= 1) return;
+  cIndex = 0;
+  showSlide(0);
+  carouselInterval = setInterval(()=>{ cIndex = (cIndex + 1) % len; showSlide(cIndex); }, 2200);
+}
+function stopCarousel(){
+  if(carouselInterval){ clearInterval(carouselInterval); carouselInterval = null; }
+  if(slidesEl) slidesEl.style.transform = 'translateX(0%)';
+}
+
+/* initialize hardcoded carousel */
+populateSlides(HARDCODED_CAROUSEL);
+startCarousel(HARDCODED_CAROUSEL.length);
+
+/* --- apply config (qrlink & upiid only) --- */
 function applyConfig(cfg){
   currentConfig = cfg || null;
 
-  // UPI field
+  // UPI
   if(currentConfig && typeof currentConfig.upiid === 'string' && currentConfig.upiid.trim()){
     upiField.textContent = currentConfig.upiid.trim();
     copyBtn.classList.remove('disabled'); copyBtn.disabled = false;
-    // enable app buttons
-    document.querySelectorAll('.app-btn').forEach(b => { b.classList.remove('disabled'); b.disabled = false; });
   } else {
     upiField.textContent = '';
     copyBtn.classList.add('disabled'); copyBtn.disabled = true;
-    document.querySelectorAll('.app-btn').forEach(b => { b.classList.add('disabled'); b.disabled = true; });
   }
 
   // QR image
@@ -274,195 +344,28 @@ function applyConfig(cfg){
     downloadBtn.classList.add('disabled'); downloadBtn.disabled = true;
   }
 
-  // Contact button (hardcoded link/text)
-  if(CONTACT_LINK){
-    contactBtn.dataset.link = CONTACT_LINK;
-    contactBtn.textContent = CONTACT_TEXT;
-    contactBtn.classList.remove('disabled'); contactBtn.disabled = false;
+  // enable/disable app buttons based on UPI presence
+  const appButtons = [
+    document.getElementById('btnPaytm'),
+    document.getElementById('btnGpay'),
+    document.getElementById('btnPhonePe'),
+    document.getElementById('btnOther')
+  ];
+  if(currentConfig && currentConfig.upiid){
+    appButtons.forEach(b => { b.classList.remove('disabled'); b.disabled = false; });
   } else {
-    contactBtn.dataset.link = '';
-    contactBtn.textContent = 'Contact Admin';
-    contactBtn.classList.add('disabled'); contactBtn.disabled = true;
+    appButtons.forEach(b => { b.classList.add('disabled'); b.disabled = true; });
   }
 
-  // Carousel: always use hardcoded CAROUSEL_IMAGES
-  setupCarousel(CAROUSEL_IMAGES);
+  // Contact button uses hardcoded values
+  contactBtn.dataset.link = HARDCODED_CONTACT_LINK;
+  contactBtn.textContent = HARDCODED_CONTACT_TEXT + '  💬';
+  contactBtn.classList.remove('disabled');
+  contactBtn.disabled = false;
 }
 
-/* ---------- Carousel logic: infinite loop right-to-left ---------- */
-/* Approach:
-   - Build slides for each image.
-   - Clone first slide and append to end.
-   - Start at index 0. Advance index++ every DISPLAY_MS.
-   - On transitionend, if index == slidesCount (which is clone), reset to 0 instantly without transition.
-   - Each slide remains visible for DISPLAY_MS before next slide.
-*/
-const DISPLAY_MS = 2500;    // time each image stays
-const TRANSITION_MS = 600;  // CSS transition duration should match
-
-function setupCarousel(urls){
-  // clear existing
-  clearCarousel();
-
-  if(!Array.isArray(urls) || urls.length === 0){
-    showEmptyPlaceholder();
-    return;
-  }
-
-  // populate slides
-  urls.forEach(url => {
-    const slide = createSlide(url);
-    slidesEl.appendChild(slide);
-  });
-
-  // clone first slide to allow seamless transition from last -> first
-  if(urls.length > 1){
-    const firstClone = slidesEl.children[0].cloneNode(true);
-    firstClone.classList.add('clone');
-    slidesEl.appendChild(firstClone);
-  }
-
-  // ensure slidesEl has transform 0
-  slidesEl.style.transition = 'none';
-  slidesEl.style.transform = 'translateX(0%)';
-
-  // wait for images to load (or short timeout) before starting auto cycle to avoid flicker
-  waitForImagesThenStart();
-}
-
-function createSlide(url){
-  const s = document.createElement('div');
-  s.className = 'slide';
-  const img = document.createElement('img');
-  img.src = url;
-  img.alt = 'step';
-  // handle broken image gracefully
-  img.addEventListener('error', ()=> {
-    img.style.display = 'none';
-    const err = document.createElement('div');
-    err.style.width = '100%';
-    err.style.height = '100%';
-    err.style.display = 'flex';
-    err.style.alignItems = 'center';
-    err.style.justifyContent = 'center';
-    err.style.color = '#94a3b8';
-    err.style.fontWeight = 700;
-    err.textContent = 'Image unavailable';
-    s.appendChild(err);
-  });
-  s.appendChild(img);
-  return s;
-}
-
-function clearCarousel(){
-  stopCarousel();
-  while(slidesEl.firstChild) slidesEl.removeChild(slidesEl.firstChild);
-  const ph = carouselRoot.querySelector('.carousel-empty');
-  if(ph) ph.remove();
-}
-
-function showEmptyPlaceholder(){
-  clearCarousel();
-  const ph = document.createElement('div');
-  ph.className = 'carousel-empty';
-  ph.textContent = 'No tutorial images configured';
-  carouselRoot.appendChild(ph);
-}
-
-/* Wait for visible images (first N) to load or timeout, then start auto cycle */
-function waitForImagesThenStart(){
-  stopCarousel();
-  const imgs = slidesEl.querySelectorAll('img');
-  if(imgs.length === 0){
-    // nothing to show
-    return;
-  }
-
-  let loaded = 0;
-  const total = imgs.length;
-  let done = false;
-
-  function tryStart(){
-    if(done) return;
-    done = true;
-    // small delay to allow user to see first image (so not immediate slide)
-    // set transition back to CSS and start cycle
-    slidesEl.style.transition = `transform ${TRANSITION_MS}ms cubic-bezier(.2,.8,.2,1)`;
-    startCarousel();
-  }
-
-  imgs.forEach(img => {
-    if(img.complete){
-      loaded++;
-    } else {
-      img.addEventListener('load', ()=> { loaded++; if(loaded >= 1 && !done){ tryStart(); } });
-      img.addEventListener('error', ()=> { loaded++; if(loaded >= 1 && !done){ tryStart(); } });
-    }
-  });
-
-  // If at least one image is loaded already, start after short delay to avoid flicker
-  if(loaded >= 1){
-    setTimeout(() => { if(!done) tryStart(); }, 60); // micro delay
-  } else {
-    // fallback: start after 400ms if nothing loads (avoid infinite wait)
-    setTimeout(() => { if(!done) tryStart(); }, 400);
-  }
-}
-
-function startCarousel(){
-  stopCarousel();
-  const slidesCountReal = slidesEl.children.length;
-  if(slidesCountReal === 0) return;
-  // number of logical slides (without clone)
-  const logicalCount = (slidesCountReal > 1 && slidesEl.children[slidesCountReal - 1].classList.contains('clone'))
-                       ? slidesCountReal - 1
-                       : slidesCountReal;
-
-  let index = 0;
-  // Ensure first slide is visible
-  slidesEl.style.transform = `translateX(0%)`;
-
-  // Advance function
-  function advance(){
-    index++;
-    // move
-    slidesEl.style.transform = `translateX(-${index * 100}%)`;
-    // When transition ends, check if we've reached clone
-    const onTransitionEnd = function(){
-      slidesEl.removeEventListener('transitionend', onTransitionEnd);
-      // if index equals logicalCount, we are at the clone -> reset to 0 instantly
-      if(index >= logicalCount){
-        // reset without animation
-        slidesEl.style.transition = 'none';
-        slidesEl.style.transform = 'translateX(0%)';
-        index = 0;
-        // Force reflow then restore transition so next advance will animate
-        // eslint-disable-next-line no-unused-expressions
-        slidesEl.offsetHeight;
-        slidesEl.style.transition = `transform ${TRANSITION_MS}ms cubic-bezier(.2,.8,.2,1)`;
-      }
-    };
-    slidesEl.addEventListener('transitionend', onTransitionEnd, { once: true });
-  }
-
-  // Start the interval: show first image for DISPLAY_MS then advance, then every DISPLAY_MS advance
-  // Use setInterval but ensure first delay is DISPLAY_MS (so each image stays for DISPLAY_MS)
-  carouselInterval = setInterval(advance, DISPLAY_MS);
-  // Also keep a timeout to start first advance after DISPLAY_MS so first image stays
-  autoStartTimeout = setTimeout(advance, DISPLAY_MS);
-}
-
-function stopCarousel(){
-  if(carouselInterval){ clearInterval(carouselInterval); carouselInterval = null; }
-  if(autoStartTimeout){ clearTimeout(autoStartTimeout); autoStartTimeout = null; }
-}
-
-/* ========== config loader (only qrlink & upiid used) ========== */
-function removeExistingConfigScript(){
-  if(configScriptEl && configScriptEl.parentNode) configScriptEl.remove();
-  configScriptEl = null;
-}
-
+/* --- load external config.js (cache-busted) --- */
+function removeExistingConfigScript(){ if(configScriptEl && configScriptEl.parentNode) configScriptEl.remove(); configScriptEl = null; }
 function loadConfigScript(){
   try { delete window.CONFIG; } catch(e) { window.CONFIG = undefined; }
   removeExistingConfigScript();
@@ -473,9 +376,9 @@ function loadConfigScript(){
   s.onload = () => {
     if(window.CONFIG && typeof window.CONFIG === 'object'){
       applyConfig(window.CONFIG);
-      console.info('CONFIG loaded:', window.CONFIG);
+      console.info('CONFIG loaded', window.CONFIG);
     } else {
-      console.warn('config.js loaded but window.CONFIG invalid or missing.');
+      console.warn('config.js loaded but window.CONFIG not found or invalid.');
       applyConfig(null);
     }
   };
@@ -487,12 +390,12 @@ function loadConfigScript(){
   configScriptEl = s;
 }
 
-/* Polling to auto-sync config changes (as before) */
+/* polling for config changes */
 const CONFIG_POLL_INTERVAL_MS = 2500;
 loadConfigScript();
 setInterval(loadConfigScript, CONFIG_POLL_INTERVAL_MS);
 
-/* ========== Download QR ========== */
+/* --- Download QR --- */
 async function downloadQr(){
   try{
     const src = qrImg.src;
@@ -515,9 +418,9 @@ async function downloadQr(){
     }
   }
 }
-document.getElementById('downloadBtn').addEventListener('click', downloadQr);
+downloadBtn.addEventListener('click', downloadQr);
 
-/* ========== Copy UPI to clipboard ========== */
+/* --- Copy UPI --- */
 copyBtn.addEventListener('click', async ()=>{
   if(!currentConfig || !currentConfig.upiid){ showToast('No UPI configured'); return; }
   try{
@@ -530,13 +433,10 @@ copyBtn.addEventListener('click', async ()=>{
   }
 });
 
-/* ========== App openers ========== */
+/* --- App openers (use upiid from config) --- */
 const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
 function openChain(pref){
-  if(!currentConfig || !currentConfig.upiid){
-    alert('UPI ID not configured.');
-    return;
-  }
+  if(!currentConfig || !currentConfig.upiid){ alert('UPI ID not configured.'); return; }
   const query = new URLSearchParams({pa: currentConfig.upiid, cu:'INR'}).toString();
   const generic = 'upi://pay?' + query;
   const ua = navigator.userAgent || '';
@@ -567,14 +467,14 @@ document.getElementById('btnOther').addEventListener('click', ()=> {
   window.location.href = 'upi://pay?pa=' + encodeURIComponent(currentConfig.upiid) + '&cu=INR';
 });
 
-/* ========== Contact button ========== */
+/* --- Contact --- */
 contactBtn.addEventListener('click', ()=>{
-  const link = contactBtn.dataset.link || '';
+  const link = contactBtn.dataset.link || HARDCODED_CONTACT_LINK;
   if(link) window.open(link, '_blank');
   else showToast('Contact link not configured');
 });
 
-/* ========== QR image error fallback ========== */
+/* --- qr image error fallback --- */
 qrImg.addEventListener('error', ()=>{
   qrImg.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'
