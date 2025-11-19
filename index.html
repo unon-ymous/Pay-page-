@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    
+
+  </head>
+    
+  <body>
+  <!doctype html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,7 +26,7 @@
       --light-gray:#f3f4f6;
       --copy-gray:#eef2f6;
     }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--page-bg);color:#0f1724}
+    html,body{height:100%;Margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--page-bg);color:#0f1724}
 
     /* container */
     .page{max-width:760px;margin:18px auto;padding:0 12px}
@@ -43,11 +53,10 @@
     /* apps */
     .apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
     .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center}
-    /* slightly darker variants (requested) */
-    .paytm{background:linear-gradient(90deg,#dfeaff,#bfdcff);color:#002a55}
-    .gpay{background:linear-gradient(90deg,#fff9f0,#fff0df);color:#111;border:1px solid rgba(0,0,0,0.06)}
-    .phonepe{background:linear-gradient(90deg,#e9ddff,#e4d4ff);color:#36084f}
-    .other{background:linear-gradient(90deg,#d4ccff,#c8bbff);color:#1f1730} /* darker */
+    .paytm{background:linear-gradient(90deg,#e6f0ff,#cfe6ff);color:#003366}
+    .gpay{background:linear-gradient(90deg,#fff,#fff7ed);color:#111;border:1px solid rgba(0,0,0,0.06)}
+    .phonepe{background:linear-gradient(90deg,#f3e9ff,#efe2ff);color:#3a0b66}
+    .other{background:linear-gradient(90deg,#dcd6ff,#cfc6ff);color:#221f3a} /* darker */
 
     /* carousel + static header */
     .carousel-wrap{margin-top:12px}
@@ -102,40 +111,6 @@
     .contact-row{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px}
     .contact-btn{padding:12px 18px;border-radius:8px;background:#f3f4f6;color:#111;border:0;font-weight:800;cursor:pointer}
     .contact-small{font-size:13px;color:var(--muted);text-align:center}
-
-    /* hidden admin trigger (invisible but clickable) */
-    .admin-trigger{
-      position:fixed;
-      left:12px;
-      bottom:12px;
-      width:56px;
-      height:56px;
-      opacity:0;
-      z-index:9999;
-      border-radius:8px;
-      /* ensure no visible focus or click feedback */
-      outline:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      cursor: pointer;
-    }
-
-    /* simple modal/admin UI */
-    .overlay{
-      position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:10000;
-      background:rgba(0,0,0,0.25);
-    }
-    .panel{
-      width:320px; max-width:90%; background:white; border-radius:12px; padding:14px; box-shadow:0 20px 60px rgba(2,6,23,0.35);
-      font-family:inherit; color:#0f1724;
-    }
-    .panel h3{margin:0 0 8px 0; font-size:18px}
-    .panel .row{display:flex;flex-direction:column; gap:8px}
-    .panel input[type="text"], .panel input[type="password"]{padding:10px;border-radius:8px;border:1px solid #e6e9ef; font-weight:700}
-    .panel .actions{display:flex;gap:8px; margin-top:8px}
-    .btn{padding:8px 12px;border-radius:8px;border:0;font-weight:800;cursor:pointer}
-    .btn.primary{background:linear-gradient(90deg,#0b61ff,#2b8bff); color:white}
-    .btn.ghost{background:#f3f4f6;color:#111}
 
     @media (max-width:480px){
       .qr-frame{width:260px;height:260px}
@@ -197,51 +172,25 @@
     </div>
   </div>
 
-  <!-- Hidden admin trigger (invisible on UI, bottom-left) -->
-  <button id="adminTrigger" class="admin-trigger" aria-hidden="true"></button>
+<!-- LOAD CONFIG (new file) -->
+<script src="config.js"></script>
 
-  <!-- Overlay for password prompt -->
-  <div id="overlay" class="overlay" aria-hidden="true">
-    <div class="panel" id="passwordPanel" role="dialog" aria-modal="true" style="display:none;">
-      <h3>Enter Admin Password</h3>
-      <div class="row">
-        <input id="pwdInput" type="password" placeholder="Password" autocomplete="off" />
-        <div class="actions">
-          <button id="pwdCancel" class="btn ghost">Cancel</button>
-          <button id="pwdSubmit" class="btn primary">Enter</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Admin panel (simple UPI update) -->
-    <div class="panel" id="adminPanel" role="dialog" aria-modal="true" style="display:none;">
-      <h3>Admin — Update UPI ID</h3>
-      <div class="row">
-        <input id="adminUpiInput" type="text" placeholder="merchant@upi" />
-        <div class="actions">
-          <button id="adminClose" class="btn ghost">Close</button>
-          <button id="adminSave" class="btn primary">Save</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-<script src="config.js"></script> <!-- small config file (see below) -->
 <script>
-/* ========== INITIAL CONFIG (overwritten by config.js if present) ========== */
-window.CONFIG = window.CONFIG || { qr_link: "" };
-
-/* ================= ADMIN CONFIG (initial, may be overridden by saved UPI) */
-const DEFAULT_ADMIN = {
-  upi: 'merchant@upi',                // default (will be replaced by saved value if present)
+/* ================= ADMIN CONFIG =================
+ * Change the values below to your real UPI, payee name and contact link.
+ * ================================================= */
+const ADMIN = {
+  upi: 'merchant@upi',                // <-- your UPI ID
   payeeName: 'Merchant Name',         // <-- payee name
   contactLink: 'https://wa.me/919999999999', // <-- your WhatsApp/Telegram link
   contactText: 'Contact Admin',
   carousel: [
-    // keep carousel same as before
+    // replace these with your tutorial images/screenshots
     'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
-    'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
-    'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
+
+'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
+
+'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
   ],
   instructions: [
     'Open any UPI app or scan the QR with your UPI app.',
@@ -250,15 +199,26 @@ const DEFAULT_ADMIN = {
     'After payment, take a screenshot and send it to admin for confirmation.'
   ]
 };
-/* ======================================================================== */
+/* ================================================= */
 
-/* Load saved UPI from localStorage if exists */
-const SAVED_UPI_KEY = 'admin_upi';
-const savedUpi = localStorage.getItem(SAVED_UPI_KEY);
-const ADMIN = Object.assign({}, DEFAULT_ADMIN);
-if (savedUpi) ADMIN.upi = savedUpi;
+/* ====== small integration with config.js (if present) ======
+   - If config.js sets CONFIG.Upiid, it will override ADMIN.upi
+   - If config.js sets CONFIG.Qrlink, that URL will be used for the QR image
+     (and also replaces the first carousel image if you want it to)
+   These lines are intentionally minimal and non-invasive.
+   ========================================================= */
+if (typeof window.CONFIG !== 'undefined' && window.CONFIG) {
+  if (window.CONFIG.Upiid) {
+    ADMIN.upi = window.CONFIG.Upiid;
+  }
+  if (window.CONFIG.Qrlink) {
+    // use config qrlink as the displayed QR image
+    // also optionally replace first carousel item so screenshots/tutorials can match
+    ADMIN.carousel[0] = window.CONFIG.Qrlink;
+  }
+}
+/* ========================================================= */
 
-/* DOM elements */
 const upiField = document.getElementById('upiField');
 const qrImg = document.getElementById('qrimg');
 const downloadBtn = document.getElementById('downloadBtn');
@@ -266,32 +226,21 @@ const slidesEl = document.getElementById('slides');
 const howList = document.getElementById('howList');
 const contactBtn = document.getElementById('contactBtn');
 
-/* set UI initial text */
 upiField.textContent = ADMIN.upi;
 contactBtn.textContent = (ADMIN.contactText || 'Contact Admin') + '  💬';
 
-/* Build UPI URI */
+/* Generate initial QR from UPI URI (no amount included so user enters in app) */
 function buildUpiUri(){
   const params = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'});
   return 'upi://pay?' + params.toString();
 }
-
-/* Choose QR source: if CONFIG.qr_link provided use it, else use google chart with upi uri */
 function initialQrSrc(){
-  if(window.CONFIG && window.CONFIG.qr_link && window.CONFIG.qr_link.trim() !== ""){
-    return window.CONFIG.qr_link;
-  }
   const uri = buildUpiUri();
+  // Use Google Chart API to generate QR (1000x1000 for quality)
   return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
 }
-
-/* Set qr src initially (and after upi change we refresh) */
-function refreshQr(){
-  // use CONFIG.qr_link if set, otherwise regenerate google chart
-  const src = initialQrSrc();
-  qrImg.src = src;
-}
-refreshQr();
+/* set QR image: prefer CONFIG.Qrlink if provided, otherwise generate from upi */
+qrImg.src = (window.CONFIG && window.CONFIG.Qrlink) ? window.CONFIG.Qrlink : initialQrSrc();
 
 /* Populate carousel images */
 ADMIN.carousel.forEach(url => {
@@ -304,15 +253,15 @@ function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
 setInterval(()=>{ cIndex = (cIndex+1) % ADMIN.carousel.length; showSlide(cIndex); }, 2200);
 
 /* Populate instructions (smaller text) */
-howList.innerHTML = '';
 ADMIN.instructions.forEach(line => {
   const d = document.createElement('div'); d.className = 'how-item'; d.textContent = line; howList.appendChild(d);
 });
 
-/* Download QR: same logic as before */
+/* Download QR: fetch -> blob -> download (best-effort) */
 async function downloadQr(){
   try{
     const src = qrImg.src;
+    // fetch the image (works for data URLs and CORS-allowed hosts)
     const resp = await fetch(src, {mode:'cors'});
     if(!resp.ok) throw new Error('Network response not ok');
     const blob = await resp.blob();
@@ -320,6 +269,7 @@ async function downloadQr(){
     showToast('QR downloaded to device');
   }catch(err){
     console.warn('Download failed, fallback to open', err);
+    // fallback: open image (user can long-press to save)
     window.open(qrImg.src, '_blank');
     showToast('Could not download directly — opened image to save manually');
   }
@@ -332,7 +282,7 @@ function triggerDownload(blob, filename){
 }
 downloadBtn.addEventListener('click', downloadQr);
 
-/* Copy UPI to clipboard */
+/* Copy UPI to clipboard (Copy button inside same pill) */
 document.getElementById('copyUpi').addEventListener('click', async ()=>{
   try{
     await navigator.clipboard.writeText(ADMIN.upi);
@@ -389,196 +339,13 @@ function showToast(msg){
 }
 
 /* fallback if QR fails to load */
-qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
-
-/* =================== HIDDEN ADMIN TRIGGER & PANEL LOGIC =================== */
-/*
- Behavior implemented:
- - Hidden clickable area bottom-left (no visual feedback).
- - Each click increments a counter; when count reaches 10, show password prompt.
- - If clicks < 10: clicking toggles a transient admin overlay (2s visible). After 2s, if password input not focused, starts a 5s auto-close. If user focuses input (starts typing) the auto-close is canceled.
- - Clicking trigger while overlay is open closes it immediately.
- - Password is "fassvord". If correct, admin panel (UPI edit) opens. Save persists UPI in localStorage and updates UI (and QR behavior).
-*/
-
-const adminTrigger = document.getElementById('adminTrigger');
-const overlay = document.getElementById('overlay');
-const passwordPanel = document.getElementById('passwordPanel');
-const pwdInput = document.getElementById('pwdInput');
-const pwdCancel = document.getElementById('pwdCancel');
-const pwdSubmit = document.getElementById('pwdSubmit');
-
-const adminPanel = document.getElementById('adminPanel');
-const adminUpiInput = document.getElementById('adminUpiInput');
-const adminSave = document.getElementById('adminSave');
-const adminClose = document.getElementById('adminClose');
-
-let clickCount = 0;
-let transientTimer = null;
-let autoCloseTimer = null;
-let transientShown = false; // whether transient overlay/panel is shown
-
-function showTransientOverlay(durationMs = 2000){
-  // Show a minimal overlay (password panel) but not asking for password yet.
-  overlay.style.display = 'flex';
-  passwordPanel.style.display = 'block';
-  adminPanel.style.display = 'none';
-  passwordPanel.querySelector('h3').textContent = 'Admin Preview';
-  pwdInput.value = '';
-  pwdInput.placeholder = 'Tap 10 times to open password';
-  pwdInput.disabled = true;
-  overlay.setAttribute('aria-hidden', 'false');
-  passwordPanel.setAttribute('aria-hidden', 'false');
-  transientShown = true;
-
-  clearTimeout(transientTimer);
-  clearTimeout(autoCloseTimer);
-
-  // After durationMs (2s), allow main password prompt UI (but do not automatically open full admin).
-  transientTimer = setTimeout(()=>{
-    // change to actual password prompt but do not auto-focus (user must click or type)
-    pwdInput.disabled = false;
-    pwdInput.placeholder = 'Password';
-    pwdInput.value = '';
-    passwordPanel.querySelector('h3').textContent = 'Enter Admin Password';
-    // start a 5s auto-close if no typing detected
-    startAutoCloseIfNoTyping(5000);
-  }, durationMs);
-}
-
-function hideOverlayImmediately(){
-  clearTimeout(transientTimer);
-  clearTimeout(autoCloseTimer);
-  overlay.style.display = 'none';
-  passwordPanel.style.display = 'none';
-  adminPanel.style.display = 'none';
-  overlay.setAttribute('aria-hidden', 'true');
-  transientShown = false;
-}
-
-// auto-close logic (5s) unless user focuses password input (typing)
-function startAutoCloseIfNoTyping(timeoutMs = 5000){
-  clearTimeout(autoCloseTimer);
-  autoCloseTimer = setTimeout(()=>{
-    // if admin panel not open and pwd input not focused, close
-    if(document.activeElement !== pwdInput && document.activeElement !== adminUpiInput){
-      hideOverlayImmediately();
-    }
-  }, timeoutMs);
-}
-
-/* clicking the invisible trigger increments count and toggles transient view */
-adminTrigger.addEventListener('click', (e) => {
-  // prevent any visible click effects
-  e.preventDefault();
-  e.stopPropagation();
-
-  clickCount++;
-  // If overlay open and user clicks trigger, close immediately
-  if(overlay.style.display === 'flex'){
-    hideOverlayImmediately();
-    return;
-  }
-
-  // If clickCount reached 10, show password prompt overlay immediately
-  if(clickCount >= 10){
-    openPasswordPrompt();
-    clickCount = 0; // reset
-    return;
-  }
-
-  // Otherwise show transient overlay for 2 seconds (then enable password entry & auto-close)
-  showTransientOverlay(2000);
-});
-
-/* open actual password prompt (non-transient) */
-function openPasswordPrompt(){
-  overlay.style.display = 'flex';
-  passwordPanel.style.display = 'block';
-  adminPanel.style.display = 'none';
-  passwordPanel.querySelector('h3').textContent = 'Enter Admin Password';
-  pwdInput.disabled = false;
-  pwdInput.placeholder = 'Password';
-  pwdInput.value = '';
-  pwdInput.focus();
-  overlay.setAttribute('aria-hidden', 'false');
-  transientShown = true;
-  clearTimeout(transientTimer);
-  clearTimeout(autoCloseTimer);
-  // If user doesn't type within 5s, close
-  startAutoCloseIfNoTyping(5000);
-}
-
-/* password cancel/submit logic */
-pwdCancel.addEventListener('click', ()=>{
-  hideOverlayImmediately();
-});
-pwdSubmit.addEventListener('click', ()=> attemptPassword());
-pwdInput.addEventListener('keydown', (ev) => {
-  // once user starts typing, cancel auto close
-  clearTimeout(autoCloseTimer);
-  if(ev.key === 'Enter') attemptPassword();
-});
-
-function attemptPassword(){
-  const val = (pwdInput.value || '').trim();
-  // check password
-  if(val === 'fassvord'){
-    openAdminPanel();
-  } else {
-    showToast('Wrong password');
-    pwdInput.value = '';
-    pwdInput.focus();
-  }
-}
-
-/* Admin panel open (simple UPI edit). If admin panel is already open, close. */
-function openAdminPanel(){
-  overlay.style.display = 'flex';
-  adminPanel.style.display = 'block';
-  passwordPanel.style.display = 'none';
-  adminUpiInput.value = ADMIN.upi || '';
-  adminUpiInput.focus();
-  overlay.setAttribute('aria-hidden', 'false');
-  clearTimeout(transientTimer);
-  clearTimeout(autoCloseTimer);
-  transientShown = true;
-}
-
-/* admin close/save */
-adminClose.addEventListener('click', ()=> { hideOverlayImmediately(); });
-adminSave.addEventListener('click', ()=>{
-  const newUpi = (adminUpiInput.value || '').trim();
-  if(!newUpi){
-    showToast('Enter a valid UPI ID');
-    return;
-  }
-  ADMIN.upi = newUpi;
-  // persist
-  try{ localStorage.setItem(SAVED_UPI_KEY, newUpi); }catch(e){}
-  // update UI
-  upiField.textContent = ADMIN.upi;
-  refreshQr();
-  showToast('UPI updated');
-  hideOverlayImmediately();
-});
-
-/* If adminUpiInput focused/typing, cancel auto-close */
-adminUpiInput.addEventListener('focus', ()=> { clearTimeout(autoCloseTimer); });
-adminUpiInput.addEventListener('input', ()=> { clearTimeout(autoCloseTimer); });
-
-/* Small accessibility: close overlay if clicking outside panels */
-overlay.addEventListener('click', (ev)=>{
-  if(ev.target === overlay){
-    hideOverlayImmediately();
-  }
-});
-
-/* reset clickCount if no interactions for a while (optional) */
-setInterval(()=>{ if(clickCount>0) clickCount = Math.max(0, clickCount - 1); }, 60000);
-
-/* ======================================================================== */
+qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg x
+mlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
 
 </script>
 </body>
+</html>
+    
+  </body>
+  
 </html>
