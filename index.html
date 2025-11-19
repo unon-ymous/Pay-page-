@@ -161,11 +161,19 @@
     </div>
   </div>
 
-  <!-- note: config.js is still used, but we will poll it dynamically. -->
   <script>
   document.addEventListener('DOMContentLoaded', function () {
 
-    // DEFAULT ADMIN values (unchanged UI)
+    // ---------- CONFIG ----------
+    // OPTIONAL: set RAW_CONFIG_URL to the raw.githubusercontent.com URL of your config.js
+    // Example: "https://raw.githubusercontent.com/<username>/<repo>/<branch>/config.js"
+    // If you leave it blank, the page will poll the site-relative /config.js file.
+    const RAW_CONFIG_URL = ""; // <-- OPTIONAL: set this once for GitHub repo raw URL (one-time change)
+
+    // Poll interval in ms (1 second gives near-instant updates)
+    const POLL_INTERVAL_MS = 1000;
+
+    // Default ADMIN object (UI unchanged)
     const ADMIN = {
       upi: 'merchant@upi',
       payeeName: 'Merchant Name',
@@ -184,11 +192,8 @@
       ]
     };
 
-    // --- utils to safely parse PAY_CONFIG from config.js fetched content ---
-    // We will fetch "config.js" as text and extract Qrlink and Upiid with regex.
-    // This avoids executing arbitrary code and keeps it robust for static hosts.
+    // ---------- helper to parse config.js text safely (no executing) ----------
     function parseConfigJsText(txt){
-      // match Qrlink: "..."
       const qMatch = txt.match(/Qrlink\s*:\s*["']([^"']*)["']/);
       const uMatch = txt.match(/Upiid\s*:\s*["']([^"']*)["']/);
       return {
@@ -197,47 +202,46 @@
       };
     }
 
-    // Caches last raw config text so we can detect changes
-    let lastConfigRaw = null;
-
-    // Fetch config.js with cache-busting, return parsed object or null on error
-    async function fetchConfigOnce(){
-      try{
-        const url = 'config.js?cb=' + Date.now();
-        const resp = await fetch(url, { cache: 'no-store' });
-        if(!resp.ok) return null;
-        const txt = await resp.text();
-        const parsed = parseConfigJsText(txt);
-        return { raw: txt, parsed };
-      }catch(e){
-        console.warn('fetchConfigOnce error', e);
-        return null;
+    // Fetch config with cache-busting. Try RAW_CONFIG_URL first (if set), then site-relative /config.js
+    async function fetchConfigText(){
+      const candidates = [];
+      if(RAW_CONFIG_URL && RAW_CONFIG_URL.trim() !== "") {
+        candidates.push(RAW_CONFIG_URL + '?cb=' + Date.now());
       }
+      // site-relative config (same origin as page)
+      candidates.push(window.location.origin + '/config.js?cb=' + Date.now());
+      for(const url of candidates){
+        try{
+          const res = await fetch(url, { cache: 'no-store' });
+          if(!res.ok) continue;
+          const txt = await res.text();
+          if(txt && txt.trim().length > 0) return { raw: txt, url };
+        }catch(e){
+          // try next candidate
+          // console.warn('fetch error', e);
+        }
+      }
+      return null;
     }
 
-    // Apply parsed config (only if values provided) and update UI live
-    function applyConfig(parsed){
+    // Apply parsed config to ADMIN and UI immediately
+    function applyParsedConfig(parsed){
       let changed = false;
-      if(parsed && typeof parsed === 'object'){
-        if(parsed.Upiid && parsed.Upiid.trim() !== '' && ADMIN.upi !== parsed.Upiid.trim()){
-          ADMIN.upi = parsed.Upiid.trim();
-          changed = true;
-          // update UPI on page
-          const upiField = document.getElementById('upiField');
-          if(upiField) upiField.textContent = ADMIN.upi;
-        }
-        // Qrlink update
-        if(typeof parsed.Qrlink === 'string'){
-          const newQ = parsed.Qrlink.trim();
-          // treat empty string as "generate from UPI"
-          const qrImg = document.getElementById('qrimg');
-          if(qrImg){
-            const newSrc = newQ !== '' ? newQ : generateQrFromUpi();
-            // only update if different
-            if(qrImg.src !== newSrc){
-              qrImg.src = newSrc;
-              changed = true;
-            }
+      if(parsed.Upiid && parsed.Upiid.trim() !== '' && ADMIN.upi !== parsed.Upiid.trim()){
+        ADMIN.upi = parsed.Upiid.trim();
+        const upiField = document.getElementById('upiField');
+        if(upiField) upiField.textContent = ADMIN.upi;
+        changed = true;
+      }
+      if(typeof parsed.Qrlink === 'string'){
+        const newQ = parsed.Qrlink.trim();
+        const qrEl = document.getElementById('qrimg');
+        if(qrEl){
+          const newSrc = newQ !== '' ? newQ : generateQrFromUpi();
+          // Note: compare full absolute URL
+          if(qrEl.src !== newSrc){
+            qrEl.src = newSrc;
+            changed = true;
           }
         }
       }
@@ -249,9 +253,10 @@
       return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
     }
 
-    // Initialize carousel and instructions (unchanged)
+    // ---------- initialize carousel and instructions (unchanged UI) ----------
     const slidesEl = document.getElementById('slides');
     const howList = document.getElementById('howList');
+
     function initCarouselAndInstructions(){
       slidesEl.innerHTML = '';
       ADMIN.carousel.forEach(url => {
@@ -271,26 +276,37 @@
     }
     initCarouselAndInstructions();
 
-    // Setup buttons (copy, download, app openers, contact) - they refer to ADMIN at runtime,
-    // so if ADMIN.upi changes later the app openers will use the updated value automatically.
+    // ---------- buttons and behavior (unchanged UX) ----------
     (function setupButtons(){
-      const qrImg = document.getElementById('qrimg');
+      const qrEl = document.getElementById('qrimg');
       const downloadBtn = document.getElementById('downloadBtn');
       if(downloadBtn){
         downloadBtn.addEventListener('click', async ()=>{
           try{
-            const src = qrImg.src;
-            const resp = await fetch(src, {mode:'cors'});
+            // Try to download via fetch -> blob -> link
+            const src = qrEl.src;
+            const resp = await fetch(src, { mode: 'cors' });
             if(!resp.ok) throw new Error('Network response not ok');
             const blob = await resp.blob();
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = 'upi-qr-' + Date.now() + '.png'; document.body.appendChild(a); a.click(); a.remove();
             URL.revokeObjectURL(url);
             showToast('QR downloaded to device');
+            return;
           }catch(err){
-            console.warn('Download failed', err);
-            window.open(qrImg.src, '_blank');
-            showToast('Could not download directly — opened image to save manually');
+            // CORS or fetch failed -> fallback: create a temporary <a> with download attribute and same-origin if possible
+            try{
+              const a2 = document.createElement('a');
+              a2.href = qrEl.src;
+              a2.target = '_blank';
+              // Attempt to force download attribute (only works same-origin or if browser allows)
+              a2.download = 'upi-qr-' + Date.now() + '.png';
+              document.body.appendChild(a2); a2.click(); a2.remove();
+              showToast('If download blocked, image opened in new tab — save manually');
+            }catch(e){
+              window.open(qrEl.src, '_blank');
+              showToast('Could not download — opened image to save manually');
+            }
           }
         });
       }
@@ -347,7 +363,7 @@
       if(contactBtn) contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
     })();
 
-    // small toast helper
+    // toast helper
     function showToast(msg){
       const t = document.createElement('div');
       t.textContent = msg;
@@ -358,56 +374,45 @@
       setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
     }
 
-    // fallback if QR fails to load
-    const qrImg = document.getElementById('qrimg');
-    if(qrImg){
-      qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
+    // QR fallback
+    const qrEl = document.getElementById('qrimg');
+    if(qrEl){
+      qrEl.addEventListener('error', ()=>{ qrEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
     }
 
-    // ---------- Initial load: try to read config.js once immediately ----------
-    (async function initialLoad(){
-      const got = await fetchConfigOnce();
-      if(got && got.parsed){
-        // apply parsed values if not empty
-        if(got.parsed.Upiid && got.parsed.Upiid.trim() !== '') ADMIN.upi = got.parsed.Upiid.trim();
-        // Qrlink handling: set image src to Qrlink if present, otherwise generate
-        if(typeof got.parsed.Qrlink === 'string' && got.parsed.Qrlink.trim() !== ''){
-          if(qrImg) qrImg.src = got.parsed.Qrlink.trim();
-        } else {
-          if(qrImg) qrImg.src = generateQrFromUpi();
-        }
-        lastConfigRaw = got.raw;
-      } else {
-        // no config.js or parse failed — fallback: generate QR from default ADMIN.upi
-        if(qrImg) qrImg.src = generateQrFromUpi();
-      }
-      // update UPI display text now
-      const upiField = document.getElementById('upiField');
-      if(upiField) upiField.textContent = ADMIN.upi;
+    // ---------- polling logic ----------
+    let lastRaw = null;
+    let polling = null;
 
-      // Start polling for live updates
-      startConfigPolling();
+    async function pollOnce(){
+      const got = await fetchConfigText();
+      if(!got) return;
+      if(lastRaw === null || got.raw !== lastRaw){
+        lastRaw = got.raw;
+        const parsed = parseConfigJsText(got.raw);
+        // If values present, apply them. If a field is blank, we keep generation behavior.
+        if(parsed.Upiid && parsed.Upiid.trim() !== '') ADMIN.upi = parsed.Upiid.trim();
+        // Apply UPI to UI
+        const upiField = document.getElementById('upiField');
+        if(upiField) upiField.textContent = ADMIN.upi;
+        // Qrlink: if blank => generate from UPI, else use provided link
+        if(typeof parsed.Qrlink === 'string' && parsed.Qrlink.trim() !== ''){
+          if(qrEl) qrEl.src = parsed.Qrlink.trim();
+        } else {
+          if(qrEl) qrEl.src = generateQrFromUpi();
+        }
+        showToast('Config updated');
+      }
+    }
+
+    // initial read, then start polling
+    (async function initial(){
+      await pollOnce();
+      if(polling) clearInterval(polling);
+      polling = setInterval(pollOnce, POLL_INTERVAL_MS);
     })();
 
-    // Polling: fetch config.js periodically and apply when changed
-    let pollTimer = null;
-    function startConfigPolling(){
-      if(pollTimer) return;
-      pollTimer = setInterval(async ()=>{
-        const got = await fetchConfigOnce();
-        if(!got) return;
-        // if raw changed, parse and apply
-        if(lastConfigRaw === null || got.raw !== lastConfigRaw){
-          lastConfigRaw = got.raw;
-          const parsed = got.parsed;
-          // applyConfig updates UPI field and QR img immediately
-          const didChange = applyConfig(parsed);
-          if(didChange) showToast('Config updated');
-        }
-      }, 2000); // poll every 2 seconds
-    }
-
-  }); // DOMContentLoaded end
+  });
   </script>
 
 </body>
