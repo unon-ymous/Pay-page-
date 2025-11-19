@@ -14,6 +14,7 @@
       --shadow:0 10px 30px rgba(12,20,40,0.06);
       --light-gray:#f3f4f6;
       --copy-gray:#eef2f6;
+      --btn-darker-overlay: rgba(0,0,0,0.04);
     }
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--page-bg);color:#0f1724}
 
@@ -41,11 +42,13 @@
 
     /* apps */
     .apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center}
-    .paytm{background:linear-gradient(90deg,#e6f0ff,#cfe6ff);color:#003366}
-    .gpay{background:linear-gradient(90deg,#fff,#fff7ed);color:#111;border:1px solid rgba(0,0,0,0.06)}
-    .phonepe{background:linear-gradient(90deg,#f3e9ff,#efe2ff);color:#3a0b66}
-    .other{background:linear-gradient(90deg,#dcd6ff,#cfc6ff);color:#221f3a} /* darker */
+    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 6px rgba(2,6,23,0.03)}
+    .app-btn img{width:18px;height:18px;display:inline-block;vertical-align:middle}
+    /* slightly darker look for buttons */
+    .paytm{background:linear-gradient(90deg,#dfe9ff,#cfe0ff);color:#003366}
+    .gpay{background:linear-gradient(90deg,#fffefc,#fff7ed);color:#111;border:1px solid rgba(0,0,0,0.06)}
+    .phonepe{background:linear-gradient(90deg,#eee3ff,#e8dbff);color:#3a0b66}
+    .other{background:linear-gradient(90deg,#f4f4f6,#ececec);color:#111} /* light gray */
 
     /* carousel + static header */
     .carousel-wrap{margin-top:12px}
@@ -64,12 +67,16 @@
       overflow:hidden;
       border-radius:8px;
       height:340px;
+      position:relative;
     }
 
     .slides{
       display:flex;
-      transition:transform 0.6s ease;
+      transition:transform 600ms cubic-bezier(.2,.8,.2,1);
       gap:0;
+      height:100%;
+      width:100%;
+      will-change: transform;
     }
 
     .slide{
@@ -86,6 +93,18 @@
       width:100%;
       height:340px;
       object-fit:contain;
+      border-radius:8px;
+    }
+
+    /* placeholder for empty carousel */
+    .carousel-empty{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100%;
+      color:#94a3b8;
+      font-weight:600;
+      background:linear-gradient(180deg,#fff,#fbfdff);
       border-radius:8px;
     }
 
@@ -111,7 +130,7 @@
 <body>
   <div class="page">
     <div class="card">
-      <!-- top bar in the same card -->
+      <!-- top bar -->
       <div class="topbar">
         <div class="logo">Pay</div>
         <div class="title">Pay Here</div>
@@ -125,7 +144,7 @@
         </div>
       </div>
 
-      <!-- UPI thin pill with copy -->
+      <!-- UPI pill -->
       <div class="upi-box">
         <div class="upi-pill">
           <div class="upi-text" id="upiField"></div>
@@ -133,18 +152,39 @@
         </div>
       </div>
 
-      <!-- App buttons -->
+      <!-- App buttons with logos -->
       <div class="apps">
-        <button id="btnPaytm" class="app-btn paytm">PAYTM</button>
-        <button id="btnGpay" class="app-btn gpay">G PAY</button>
-        <button id="btnPhonePe" class="app-btn phonepe">Phone पे</button>
-        <button id="btnOther" class="app-btn other">Other UPI Apps</button>
+        <button id="btnPaytm" class="app-btn paytm">
+          PAYTM
+          <!-- Paytm svg (small) -->
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%23005ea6'/><text x='12' y='15' font-size='10' fill='white' font-family='Arial' text-anchor='middle' font-weight='700'>P</text></svg>" alt="paytm">
+        </button>
+
+        <button id="btnGpay" class="app-btn gpay">
+          G PAY
+          <!-- Google Pay style: G colored 'G' -->
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 48 48'><circle cx='24' cy='24' r='22' fill='white'/><text x='24' y='30' font-size='22' text-anchor='middle' font-family='Arial' font-weight='700' fill='%231b73e8'>G</text></svg>" alt="gpay">
+        </button>
+
+        <button id="btnPhonePe" class="app-btn phonepe">
+          Phone पे
+          <!-- PhonePe svg -->
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%233a0b66'/><text x='12' y='15' font-size='10' fill='white' font-family='Arial' text-anchor='middle' font-weight='700'>P</text></svg>" alt="phonepe">
+        </button>
+
+        <button id="btnOther" class="app-btn other">
+          Other UPI
+          <!-- UPI official small logo approximation (gray) -->
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%23e8e8ea'/><text x='12' y='15' font-size='10' fill='%23636a6f' font-family='Arial' text-anchor='middle' font-weight='700'>UPI</text></svg>" alt="upi">
+        </button>
       </div>
 
-      <!-- carousel header (static) and carousel (images move) -->
+      <!-- carousel -->
       <div class="carousel-wrap">
         <div class="carousel-header">📲  How to send payment Screenshot</div>
-        <div class="carousel"><div class="slides" id="slides"></div></div>
+        <div class="carousel" id="carouselRoot">
+          <div class="slides" id="slides"></div>
+        </div>
       </div>
 
       <!-- instructions -->
@@ -152,7 +192,7 @@
         <div class="how-title">Instruction ❗</div>
         <div class="how-list" id="howList">
           <div class="how-item">Open any UPI app or scan the QR with your UPI app.</div>
-          <div class="how-item">Confirm the UPI ID and payee name before approving.</div>
+          <div class="how-item">Confirm the UPI ID before approving.</div>
           <div class="how-item">Enter the exact amount in your UPI app (do not rely on defaults).</div>
           <div class="how-item">After payment, take a screenshot and send it to admin for confirmation.</div>
         </div>
@@ -160,41 +200,43 @@
 
       <!-- contact -->
       <div class="contact-row">
-        <button id="contactBtn" class="contact-btn">💬 Contact Admin</button>
+        <button id="contactBtn" class="contact-btn">Contact Admin</button>
         <div class="contact-small" id="contactSmall">Send Screenshot to Admin</div>
       </div>
-
     </div>
   </div>
 
 <script>
 /*
-  THIS PAGE NO LONGER CONTAINS ANY HARDCODED UPI/QR VALUES OR AUTOMATIC QR GENERATION.
-  It reads values from an external file named `config.js` that must set a global `CONFIG` object:
-
-  Example config.js:
-    window.CONFIG = {
-      qrlink: "https://example.com/your-qr.png",
-      upiid: "merchant@upi"
-    };
-
-  The page will dynamically load and re-load that script (cache-busted) to reflect changes quickly.
+  INDEX.HTML:
+  - Uses hardcoded carousel images and contact link/text (below).
+  - Loads only `qrlink` and `upiid` from external config.js (cache-busted and polled).
 */
 
-/* --- elements --- */
+/* ========== Hardcoded values (as requested) ========== */
+const CAROUSEL_IMAGES = [
+  "https://i.ibb.co/gFPbGzZH/20251118-155331.jpg",
+  "https://i.ibb.co/TBTd5S3p/20251118-160648.jpg",
+  "https://i.ibb.co/fVJnf9V7/20251118-153613.jpg"
+];
+const CONTACT_LINK = "https://wa.me/919999999999";
+const CONTACT_TEXT = "Contact Admin";
+/* ==================================================== */
+
 const upiField = document.getElementById('upiField');
 const qrImg = document.getElementById('qrimg');
 const downloadBtn = document.getElementById('downloadBtn');
 const slidesEl = document.getElementById('slides');
-const howList = document.getElementById('howList');
+const carouselRoot = document.getElementById('carouselRoot');
 const contactBtn = document.getElementById('contactBtn');
 const copyBtn = document.getElementById('copyUpi');
 
 let currentConfig = null;
 let configScriptEl = null;
 let carouselInterval = null;
+let autoStartTimeout = null;
 
-/* --- utility: show toast --- */
+/* small toast */
 function showToast(msg){
   const t = document.createElement('div');
   t.textContent = msg;
@@ -205,119 +247,235 @@ function showToast(msg){
   setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
 }
 
-/* --- update UI from CONFIG --- */
+/* Apply config (only qrlink and upiid come from external config.js) */
 function applyConfig(cfg){
   currentConfig = cfg || null;
 
   // UPI field
   if(currentConfig && typeof currentConfig.upiid === 'string' && currentConfig.upiid.trim()){
     upiField.textContent = currentConfig.upiid.trim();
-    copyBtn.classList.remove('disabled');
-    copyBtn.disabled = false;
+    copyBtn.classList.remove('disabled'); copyBtn.disabled = false;
+    // enable app buttons
+    document.querySelectorAll('.app-btn').forEach(b => { b.classList.remove('disabled'); b.disabled = false; });
   } else {
     upiField.textContent = '';
-    copyBtn.classList.add('disabled');
-    copyBtn.disabled = true;
+    copyBtn.classList.add('disabled'); copyBtn.disabled = true;
+    document.querySelectorAll('.app-btn').forEach(b => { b.classList.add('disabled'); b.disabled = true; });
   }
 
-  // QR image: must come from config.qrlink
+  // QR image
   if(currentConfig && typeof currentConfig.qrlink === 'string' && currentConfig.qrlink.trim()){
     qrImg.src = currentConfig.qrlink.trim();
     qrImg.alt = 'QR image';
-    downloadBtn.classList.remove('disabled');
-    downloadBtn.disabled = false;
+    downloadBtn.classList.remove('disabled'); downloadBtn.disabled = false;
   } else {
-    // No QR configured -> clear image and mark download disabled
     qrImg.src = '';
     qrImg.alt = 'No QR configured';
-    downloadBtn.classList.add('disabled');
-    downloadBtn.disabled = true;
+    downloadBtn.classList.add('disabled'); downloadBtn.disabled = true;
   }
 
-  // App buttons enable/disable based on upiid presence
-  const appButtons = [document.getElementById('btnPaytm'), document.getElementById('btnGpay'), document.getElementById('btnPhonePe'), document.getElementById('btnOther')];
-  if(currentConfig && currentConfig.upiid){
-    appButtons.forEach(b => b.classList.remove('disabled'), b => b.disabled = false);
-    appButtons.forEach(b => b.disabled = false);
+  // Contact button (hardcoded link/text)
+  if(CONTACT_LINK){
+    contactBtn.dataset.link = CONTACT_LINK;
+    contactBtn.textContent = CONTACT_TEXT;
+    contactBtn.classList.remove('disabled'); contactBtn.disabled = false;
   } else {
-    appButtons.forEach(b => b.classList.add('disabled'));
-    appButtons.forEach(b => b.disabled = true);
-  }
-
-  // Optionally handle carousel images if present (non-admin, optional)
-  while(slidesEl.firstChild) slidesEl.removeChild(slidesEl.firstChild);
-  if(currentConfig && Array.isArray(currentConfig.carousel) && currentConfig.carousel.length){
-    currentConfig.carousel.forEach(url => {
-      const s = document.createElement('div'); s.className = 'slide';
-      const img = document.createElement('img'); img.src = url; img.alt = 'step';
-      s.appendChild(img); slidesEl.appendChild(s);
-    });
-    startCarousel(currentConfig.carousel.length);
-  } else {
-    stopCarousel();
-  }
-
-  // Optional contact text if present
-  if(currentConfig && currentConfig.contactText){
-    contactBtn.textContent = (currentConfig.contactText || 'Contact Admin') + '  💬';
-    if(currentConfig.contactLink) {
-      contactBtn.dataset.link = currentConfig.contactLink;
-      contactBtn.classList.remove('disabled');
-      contactBtn.disabled = false;
-    } else {
-      contactBtn.dataset.link = '';
-      contactBtn.classList.add('disabled');
-      contactBtn.disabled = true;
-    }
-  } else {
-    contactBtn.textContent = '💬 Contact Admin';
     contactBtn.dataset.link = '';
-    contactBtn.classList.add('disabled');
-    contactBtn.disabled = true;
+    contactBtn.textContent = 'Contact Admin';
+    contactBtn.classList.add('disabled'); contactBtn.disabled = true;
   }
+
+  // Carousel: always use hardcoded CAROUSEL_IMAGES
+  setupCarousel(CAROUSEL_IMAGES);
 }
 
-/* --- carousel helpers --- */
-let cIndex = 0;
-function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
-function startCarousel(len){
-  stopCarousel();
-  if(len <= 1) return;
-  cIndex = 0;
-  carouselInterval = setInterval(()=>{ cIndex = (cIndex+1) % len; showSlide(cIndex); }, 2200);
-}
-function stopCarousel(){
-  if(carouselInterval) { clearInterval(carouselInterval); carouselInterval = null; }
+/* ---------- Carousel logic: infinite loop right-to-left ---------- */
+/* Approach:
+   - Build slides for each image.
+   - Clone first slide and append to end.
+   - Start at index 0. Advance index++ every DISPLAY_MS.
+   - On transitionend, if index == slidesCount (which is clone), reset to 0 instantly without transition.
+   - Each slide remains visible for DISPLAY_MS before next slide.
+*/
+const DISPLAY_MS = 2500;    // time each image stays
+const TRANSITION_MS = 600;  // CSS transition duration should match
+
+function setupCarousel(urls){
+  // clear existing
+  clearCarousel();
+
+  if(!Array.isArray(urls) || urls.length === 0){
+    showEmptyPlaceholder();
+    return;
+  }
+
+  // populate slides
+  urls.forEach(url => {
+    const slide = createSlide(url);
+    slidesEl.appendChild(slide);
+  });
+
+  // clone first slide to allow seamless transition from last -> first
+  if(urls.length > 1){
+    const firstClone = slidesEl.children[0].cloneNode(true);
+    firstClone.classList.add('clone');
+    slidesEl.appendChild(firstClone);
+  }
+
+  // ensure slidesEl has transform 0
+  slidesEl.style.transition = 'none';
   slidesEl.style.transform = 'translateX(0%)';
+
+  // wait for images to load (or short timeout) before starting auto cycle to avoid flicker
+  waitForImagesThenStart();
 }
 
-/* --- config loader: dynamically load config.js (cache-busted) --- */
-function removeExistingConfigScript(){
-  if(configScriptEl && configScriptEl.parentNode){
-    configScriptEl.remove();
-    configScriptEl = null;
+function createSlide(url){
+  const s = document.createElement('div');
+  s.className = 'slide';
+  const img = document.createElement('img');
+  img.src = url;
+  img.alt = 'step';
+  // handle broken image gracefully
+  img.addEventListener('error', ()=> {
+    img.style.display = 'none';
+    const err = document.createElement('div');
+    err.style.width = '100%';
+    err.style.height = '100%';
+    err.style.display = 'flex';
+    err.style.alignItems = 'center';
+    err.style.justifyContent = 'center';
+    err.style.color = '#94a3b8';
+    err.style.fontWeight = 700;
+    err.textContent = 'Image unavailable';
+    s.appendChild(err);
+  });
+  s.appendChild(img);
+  return s;
+}
+
+function clearCarousel(){
+  stopCarousel();
+  while(slidesEl.firstChild) slidesEl.removeChild(slidesEl.firstChild);
+  const ph = carouselRoot.querySelector('.carousel-empty');
+  if(ph) ph.remove();
+}
+
+function showEmptyPlaceholder(){
+  clearCarousel();
+  const ph = document.createElement('div');
+  ph.className = 'carousel-empty';
+  ph.textContent = 'No tutorial images configured';
+  carouselRoot.appendChild(ph);
+}
+
+/* Wait for visible images (first N) to load or timeout, then start auto cycle */
+function waitForImagesThenStart(){
+  stopCarousel();
+  const imgs = slidesEl.querySelectorAll('img');
+  if(imgs.length === 0){
+    // nothing to show
+    return;
+  }
+
+  let loaded = 0;
+  const total = imgs.length;
+  let done = false;
+
+  function tryStart(){
+    if(done) return;
+    done = true;
+    // small delay to allow user to see first image (so not immediate slide)
+    // set transition back to CSS and start cycle
+    slidesEl.style.transition = `transform ${TRANSITION_MS}ms cubic-bezier(.2,.8,.2,1)`;
+    startCarousel();
+  }
+
+  imgs.forEach(img => {
+    if(img.complete){
+      loaded++;
+    } else {
+      img.addEventListener('load', ()=> { loaded++; if(loaded >= 1 && !done){ tryStart(); } });
+      img.addEventListener('error', ()=> { loaded++; if(loaded >= 1 && !done){ tryStart(); } });
+    }
+  });
+
+  // If at least one image is loaded already, start after short delay to avoid flicker
+  if(loaded >= 1){
+    setTimeout(() => { if(!done) tryStart(); }, 60); // micro delay
+  } else {
+    // fallback: start after 400ms if nothing loads (avoid infinite wait)
+    setTimeout(() => { if(!done) tryStart(); }, 400);
   }
 }
-function loadConfigScript(){
-  // Remove previous global CONFIG to ensure we only use what's in new file
-  try { delete window.CONFIG; } catch(e){ window.CONFIG = undefined; }
-  removeExistingConfigScript();
 
+function startCarousel(){
+  stopCarousel();
+  const slidesCountReal = slidesEl.children.length;
+  if(slidesCountReal === 0) return;
+  // number of logical slides (without clone)
+  const logicalCount = (slidesCountReal > 1 && slidesEl.children[slidesCountReal - 1].classList.contains('clone'))
+                       ? slidesCountReal - 1
+                       : slidesCountReal;
+
+  let index = 0;
+  // Ensure first slide is visible
+  slidesEl.style.transform = `translateX(0%)`;
+
+  // Advance function
+  function advance(){
+    index++;
+    // move
+    slidesEl.style.transform = `translateX(-${index * 100}%)`;
+    // When transition ends, check if we've reached clone
+    const onTransitionEnd = function(){
+      slidesEl.removeEventListener('transitionend', onTransitionEnd);
+      // if index equals logicalCount, we are at the clone -> reset to 0 instantly
+      if(index >= logicalCount){
+        // reset without animation
+        slidesEl.style.transition = 'none';
+        slidesEl.style.transform = 'translateX(0%)';
+        index = 0;
+        // Force reflow then restore transition so next advance will animate
+        // eslint-disable-next-line no-unused-expressions
+        slidesEl.offsetHeight;
+        slidesEl.style.transition = `transform ${TRANSITION_MS}ms cubic-bezier(.2,.8,.2,1)`;
+      }
+    };
+    slidesEl.addEventListener('transitionend', onTransitionEnd, { once: true });
+  }
+
+  // Start the interval: show first image for DISPLAY_MS then advance, then every DISPLAY_MS advance
+  // Use setInterval but ensure first delay is DISPLAY_MS (so each image stays for DISPLAY_MS)
+  carouselInterval = setInterval(advance, DISPLAY_MS);
+  // Also keep a timeout to start first advance after DISPLAY_MS so first image stays
+  autoStartTimeout = setTimeout(advance, DISPLAY_MS);
+}
+
+function stopCarousel(){
+  if(carouselInterval){ clearInterval(carouselInterval); carouselInterval = null; }
+  if(autoStartTimeout){ clearTimeout(autoStartTimeout); autoStartTimeout = null; }
+}
+
+/* ========== config loader (only qrlink & upiid used) ========== */
+function removeExistingConfigScript(){
+  if(configScriptEl && configScriptEl.parentNode) configScriptEl.remove();
+  configScriptEl = null;
+}
+
+function loadConfigScript(){
+  try { delete window.CONFIG; } catch(e) { window.CONFIG = undefined; }
+  removeExistingConfigScript();
   const s = document.createElement('script');
-  s.src = 'config.js?ts=' + Date.now(); // cache-bust
+  s.src = 'config.js?ts=' + Date.now();
   s.id = 'configScript';
   s.async = true;
   s.onload = () => {
-    // Expect the external script to set window.CONFIG = { qrlink: "...", upiid: "..." };
-    try {
-      if(window.CONFIG && typeof window.CONFIG === 'object'){
-        applyConfig(window.CONFIG);
-      } else {
-        applyConfig(null);
-        console.warn('config.js loaded but window.CONFIG not set or invalid.');
-      }
-    } catch(err){
-      console.error('Failed applying CONFIG:', err);
+    if(window.CONFIG && typeof window.CONFIG === 'object'){
+      applyConfig(window.CONFIG);
+      console.info('CONFIG loaded:', window.CONFIG);
+    } else {
+      console.warn('config.js loaded but window.CONFIG invalid or missing.');
       applyConfig(null);
     }
   };
@@ -329,12 +487,12 @@ function loadConfigScript(){
   configScriptEl = s;
 }
 
-/* --- continuously sync config.js (reload every n seconds) --- */
-const CONFIG_POLL_INTERVAL_MS = 2500; // change as needed
+/* Polling to auto-sync config changes (as before) */
+const CONFIG_POLL_INTERVAL_MS = 2500;
 loadConfigScript();
 setInterval(loadConfigScript, CONFIG_POLL_INTERVAL_MS);
 
-/* --- Download QR (only if qrlink present) --- */
+/* ========== Download QR ========== */
 async function downloadQr(){
   try{
     const src = qrImg.src;
@@ -357,23 +515,22 @@ async function downloadQr(){
     }
   }
 }
-downloadBtn.addEventListener('click', downloadQr);
+document.getElementById('downloadBtn').addEventListener('click', downloadQr);
 
-/* --- Copy UPI to clipboard --- */
+/* ========== Copy UPI to clipboard ========== */
 copyBtn.addEventListener('click', async ()=>{
-  if(!currentConfig || !currentConfig.upiid) { showToast('No UPI configured'); return; }
+  if(!currentConfig || !currentConfig.upiid){ showToast('No UPI configured'); return; }
   try{
     await navigator.clipboard.writeText(currentConfig.upiid);
     showToast('UPI copied to clipboard');
   }catch(e){
-    // fallback
     const t = document.createElement('textarea'); t.value = currentConfig.upiid; document.body.appendChild(t); t.select();
     document.execCommand('copy'); t.remove();
     showToast('UPI copied to clipboard');
   }
 });
 
-/* --- App openers (use upiid from config) --- */
+/* ========== App openers ========== */
 const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
 function openChain(pref){
   if(!currentConfig || !currentConfig.upiid){
@@ -410,21 +567,19 @@ document.getElementById('btnOther').addEventListener('click', ()=> {
   window.location.href = 'upi://pay?pa=' + encodeURIComponent(currentConfig.upiid) + '&cu=INR';
 });
 
-/* --- Contact button --- */
+/* ========== Contact button ========== */
 contactBtn.addEventListener('click', ()=>{
   const link = contactBtn.dataset.link || '';
   if(link) window.open(link, '_blank');
   else showToast('Contact link not configured');
 });
 
-/* --- QR image error fallback --- */
+/* ========== QR image error fallback ========== */
 qrImg.addEventListener('error', ()=>{
-  // show a simple inline SVG indicating missing/unavailable QR
   qrImg.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'
   );
 });
-
 </script>
 </body>
 </html>
