@@ -14,129 +14,62 @@
       --shadow:0 10px 30px rgba(12,20,40,0.06);
       --light-gray:#f3f4f6;
       --copy-gray:#eef2f6;
-      --btn-darken: 0.92; /* multiply to make bg slightly darker visually */
     }
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--page-bg);color:#0f1724}
-
-    /* container */
     .page{max-width:760px;margin:18px auto;padding:0 12px}
     .card{background:linear-gradient(180deg,#f8fcff,#ffffff);border-radius:16px;padding:14px;box-shadow:var(--shadow);overflow:hidden}
-
-    /* topbar */
     .topbar{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(90deg,#e6f5ff,#dff2ff)}
     .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#0b61ff,#33a1ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px}
     .title{font-size:26px;font-style:italic;color:#08324a;font-weight:800;letter-spacing:0.3px}
 
-    /* QR area */
     .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px}
     .qr-frame{width:320px;height:320px;border-radius:12px;border:1px dashed rgba(8,12,20,0.06);overflow:hidden;background:#fff;display:grid;place-items:center}
     .qr-frame img{width:100%;height:100%;object-fit:cover;display:block}
     .controls{display:flex;gap:10px;align-items:center;width:92%}
     .download{flex:1;padding:12px;border-radius:18px;background:linear-gradient(90deg,#dff7e1,#c6f0c9);border:1px solid rgba(10,91,46,0.08);font-weight:700;cursor:pointer}
 
-    /* UPI single thin box with copy inside */
     .upi-box{margin-top:10px;display:flex;align-items:center;gap:8px;width:92%}
     .upi-pill{flex:1;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:10px;background:#fafcff;border:1px solid rgba(8,12,20,0.06);font-weight:700}
     .upi-text{font-size:15px;color:#0b1f2f}
     .copy-btn{padding:6px 10px;border-radius:8px;background:var(--copy-gray);color:#425066;border:0;cursor:pointer;font-weight:700}
 
-    /* apps */
     .apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
     .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
-    /* Slightly darker variants */
     .paytm{background:linear-gradient(90deg,#dfe9ff,#cfe0ff);color:#003366}
     .gpay{background:linear-gradient(90deg,#f8f8f8,#fff3e6);color:#111;border:1px solid rgba(0,0,0,0.06)}
     .phonepe{background:linear-gradient(90deg,#eadcff,#e6dbff);color:#3a0b66}
     .other{background:linear-gradient(90deg,#f0f0f0,#ececec);color:#121212;border:1px solid rgba(0,0,0,0.04)}
+    .app-logo{height:22px;width:22px;object-fit:contain;margin-left:6px}
 
-    /* icon wrapper to keep logos consistent */
-    .app-icon{width:20px;height:20px;display:inline-block;vertical-align:middle}
-
-    /* carousel + static header */
     .carousel-wrap{margin-top:12px}
-    .carousel-header{
-      padding:8px;
-      border-radius:8px;
-      background:linear-gradient(180deg,#f5f7fa,#ffffff);
-      border:1px solid rgba(8,12,20,0.04);
-      color:#475569;
-      font-weight:700;
-      font-size:14px;
-    }
+    .carousel-header{padding:8px;border-radius:8px;background:linear-gradient(180deg,#f5f7fa,#ffffff);border:1px solid rgba(8,12,20,0.04);color:#475569;font-weight:700;font-size:14px}
+    .carousel{margin-top:8px;overflow:hidden;border-radius:8px;height:340px;position:relative}
+    .slides{display:flex;transition:transform 0.6s ease;gap:0;height:100%;width:100%}
+    .slide{min-width:100%;flex-shrink:0;padding:0;height:100%;display:flex;justify-content:center;align-items:center}
+    .slide img{width:100%;height:340px;object-fit:contain;border-radius:8px}
+    .carousel-empty{display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-weight:600;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:8px}
 
-    .carousel{
-      margin-top:8px;
-      overflow:hidden;
-      border-radius:8px;
-      height:340px;
-      position:relative;
-    }
-
-    .slides{
-      display:flex;
-      transition:transform 0.6s ease;
-      gap:0;
-      height:100%;
-      width:100%;
-    }
-
-    .slide{
-      min-width:100%;
-      flex-shrink:0;
-      padding:0;
-      height:100%;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
-
-    .slide img{
-      width:100%;
-      height:340px;
-      object-fit:contain;
-      border-radius:8px;
-    }
-
-    .carousel-empty{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height:100%;
-      color:#94a3b8;
-      font-weight:600;
-      background:linear-gradient(180deg,#fff,#fbfdff);
-      border-radius:8px;
-    }
-
-    /* instructions in light shiny box (smaller text) */
     .instructions-box{margin-top:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#f8fbff,#ffffff);border:1px solid rgba(8,12,20,0.04);box-shadow:0 6px 18px rgba(11,97,255,0.03)}
     .how-title{font-weight:800;color:#111;margin-bottom:8px}
     .how-list{display:flex;flex-direction:column;gap:6px}
     .how-item{background:transparent;padding:6px;color:#475569;font-size:13px}
 
-    /* contact */
     .contact-row{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px}
     .contact-btn{padding:12px 18px;border-radius:8px;background:#f3f4f6;color:#111;border:0;font-weight:800;cursor:pointer}
     .contact-small{font-size:13px;color:var(--muted);text-align:center}
 
-    @media (max-width:480px){
-      .qr-frame{width:260px;height:260px}
-      .title{font-size:22px}
-    }
-
+    @media (max-width:480px){ .qr-frame{width:260px;height:260px} .title{font-size:22px} }
     .disabled { opacity: 0.5; pointer-events: none; }
   </style>
 </head>
 <body>
   <div class="page">
     <div class="card">
-      <!-- top bar in the same card -->
       <div class="topbar">
         <div class="logo">Pay</div>
         <div class="title">Pay Here</div>
       </div>
 
-      <!-- QR area -->
       <div class="qr-wrap">
         <div class="qr-frame" id="qrframe"><img id="qrimg" src="" alt="QR image"></div>
         <div class="controls">
@@ -144,39 +77,33 @@
         </div>
       </div>
 
-      <!-- UPI thin pill with copy -->
       <div class="upi-box">
         <div class="upi-pill">
           <div class="upi-text" id="upiField"></div>
           <button id="copyUpi" class="copy-btn">Copy</button>
         </div>
       </div>
-      
-      <!-- App buttons (text + logo image on right) -->
+
       <div class="apps">
-  <button id="btnPaytm" class="app-btn paytm">PAYTM
-    <img src="/mnt/data/images (1).png" class="app-logo">
-  </button>
-  <button id="btnGpay" class="app-btn gpay">G PAY
-    <img src="/mnt/data/images.jpeg" class="app-logo">
-  </button>
-  <button id="btnPhonePe" class="app-btn phonepe">Phone पे
-    <img src="/mnt/data/images.png" class="app-logo">
-  </button>
-  <button id="btnOther" class="app-btn other">Other UPI
-    <img src="/mnt/data/bhim-app-icon-hd (1).png" class="app-logo">
-  </button>
+        <button id="btnPaytm" class="app-btn paytm">PAYTM
+          <img src="https://i.ibb.co/7dnZqs0M/images-1.png" class="app-logo" alt="Paytm">
+        </button>
+        <button id="btnGpay" class="app-btn gpay">G PAY
+          <img src="https://i.ibb.co/Pfxq1PT/images.jpg" class="app-logo" alt="GPay">
+        </button>
+        <button id="btnPhonePe" class="app-btn phonepe">Phone पे
+          <img src="https://i.ibb.co/kFN5mcW/images.png" class="app-logo" alt="PhonePe">
+        </button>
+        <button id="btnOther" class="app-btn other">Other UPI
+          <img src="https://i.ibb.co/n815LMq9/bhim-app-icon-hd-1.png" class="app-logo" alt="UPI">
+        </button>
       </div>
 
-      <!-- carousel header (static) and carousel (images move) -->
       <div class="carousel-wrap">
         <div class="carousel-header">📲  How to send payment Screenshot</div>
-        <div class="carousel" id="carouselRoot">
-          <div class="slides" id="slides"></div>
-        </div>
+        <div class="carousel" id="carouselRoot"><div class="slides" id="slides"></div></div>
       </div>
 
-      <!-- instructions -->
       <div class="instructions-box">
         <div class="how-title">Instruction ❗</div>
         <div class="how-list" id="howList">
@@ -187,7 +114,6 @@
         </div>
       </div>
 
-      <!-- contact -->
       <div class="contact-row">
         <button id="contactBtn" class="contact-btn">💬 Contact Admin</button>
         <div class="contact-small" id="contactSmall">Send Screenshot to Admin</div>
@@ -197,25 +123,14 @@
   </div>
 
 <script>
-/*
-  BEHAVIOR:
-  - qrlink and upiid are read from external config.js ONLY.
-  - Carousel images, contact link/text are hardcoded here per your request.
-  - Config polling continues to sync qrlink/upiid.
-*/
-
-/* --- hardcoded carousel images + contact info (per your instruction) --- */
 const HARDCODED_CAROUSEL = [
   'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
   'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
-  'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg',
-  // add more static images here if you want them displayed
+  'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
 ];
-
 const HARDCODED_CONTACT_LINK = 'https://wa.me/919999999999';
 const HARDCODED_CONTACT_TEXT = 'Contact Admin';
 
-/* --- UI elements --- */
 const upiField = document.getElementById('upiField');
 const qrImg = document.getElementById('qrimg');
 const downloadBtn = document.getElementById('downloadBtn');
@@ -227,7 +142,6 @@ let currentConfig = null;
 let configScriptEl = null;
 let carouselInterval = null;
 
-/* --- toast --- */
 function showToast(msg){
   const t = document.createElement('div');
   t.textContent = msg;
@@ -238,7 +152,6 @@ function showToast(msg){
   setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
 }
 
-/* --- carousel population (use HARDCODED_CAROUSEL) --- */
 function clearSlides(){ while(slidesEl.firstChild) slidesEl.removeChild(slidesEl.firstChild); const placeholder = carouselRoot.querySelector('.carousel-empty'); if(placeholder) placeholder.remove(); }
 
 function populateSlides(urls){
@@ -283,15 +196,11 @@ function stopCarousel(){
   if(slidesEl) slidesEl.style.transform = 'translateX(0%)';
 }
 
-/* initialize hardcoded carousel */
 populateSlides(HARDCODED_CAROUSEL);
 startCarousel(HARDCODED_CAROUSEL.length);
 
-/* --- apply config (qrlink & upiid only) --- */
 function applyConfig(cfg){
   currentConfig = cfg || null;
-
-  // UPI
   if(currentConfig && typeof currentConfig.upiid === 'string' && currentConfig.upiid.trim()){
     upiField.textContent = currentConfig.upiid.trim();
     copyBtn.classList.remove('disabled'); copyBtn.disabled = false;
@@ -299,8 +208,6 @@ function applyConfig(cfg){
     upiField.textContent = '';
     copyBtn.classList.add('disabled'); copyBtn.disabled = true;
   }
-
-  // QR image
   if(currentConfig && typeof currentConfig.qrlink === 'string' && currentConfig.qrlink.trim()){
     qrImg.src = currentConfig.qrlink.trim();
     qrImg.alt = 'QR image';
@@ -310,8 +217,6 @@ function applyConfig(cfg){
     qrImg.alt = 'No QR configured';
     downloadBtn.classList.add('disabled'); downloadBtn.disabled = true;
   }
-
-  // enable/disable app buttons based on UPI presence
   const appButtons = [
     document.getElementById('btnPaytm'),
     document.getElementById('btnGpay'),
@@ -323,15 +228,12 @@ function applyConfig(cfg){
   } else {
     appButtons.forEach(b => { b.classList.add('disabled'); b.disabled = true; });
   }
-
-  // Contact button uses hardcoded values
   contactBtn.dataset.link = HARDCODED_CONTACT_LINK;
   contactBtn.textContent = HARDCODED_CONTACT_TEXT + '  💬';
   contactBtn.classList.remove('disabled');
   contactBtn.disabled = false;
 }
 
-/* --- load external config.js (cache-busted) --- */
 function removeExistingConfigScript(){ if(configScriptEl && configScriptEl.parentNode) configScriptEl.remove(); configScriptEl = null; }
 function loadConfigScript(){
   try { delete window.CONFIG; } catch(e) { window.CONFIG = undefined; }
@@ -357,12 +259,10 @@ function loadConfigScript(){
   configScriptEl = s;
 }
 
-/* polling for config changes */
 const CONFIG_POLL_INTERVAL_MS = 2500;
 loadConfigScript();
 setInterval(loadConfigScript, CONFIG_POLL_INTERVAL_MS);
 
-/* --- Download QR --- */
 async function downloadQr(){
   try{
     const src = qrImg.src;
@@ -387,7 +287,6 @@ async function downloadQr(){
 }
 downloadBtn.addEventListener('click', downloadQr);
 
-/* --- Copy UPI --- */
 copyBtn.addEventListener('click', async ()=>{
   if(!currentConfig || !currentConfig.upiid){ showToast('No UPI configured'); return; }
   try{
@@ -400,7 +299,6 @@ copyBtn.addEventListener('click', async ()=>{
   }
 });
 
-/* --- App openers (use upiid from config) --- */
 const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
 function openChain(pref){
   if(!currentConfig || !currentConfig.upiid){ alert('UPI ID not configured.'); return; }
@@ -434,20 +332,17 @@ document.getElementById('btnOther').addEventListener('click', ()=> {
   window.location.href = 'upi://pay?pa=' + encodeURIComponent(currentConfig.upiid) + '&cu=INR';
 });
 
-/* --- Contact --- */
 contactBtn.addEventListener('click', ()=>{
   const link = contactBtn.dataset.link || HARDCODED_CONTACT_LINK;
   if(link) window.open(link, '_blank');
   else showToast('Contact link not configured');
 });
 
-/* --- qr image error fallback --- */
 qrImg.addEventListener('error', ()=>{
   qrImg.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'
   );
 });
-.app-logo{height:22px;width:22px;object-fit:contain;margin-left:6px;}
 </script>
 </body>
 </html>
