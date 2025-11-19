@@ -1,4 +1,4 @@
 window.CONFIG = {
-  qrlink: "https://envs.sh/-Qy.jpg",
-  upiid: "paytm.s1tbcvt@pty"
+  qrlink: "https://envs.sh/-i2.jpg",
+  upiid: "8799920376@okbizaxis"
 };
