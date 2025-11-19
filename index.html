@@ -127,7 +127,7 @@
       <!-- UPI thin pill with copy -->
       <div class="upi-box">
         <div class="upi-pill">
-          <div class="upi-text" id="upiField">merchant@upi</div>
+          <div class="upi-text" id="upiField"></div>
           <button id="copyUpi" class="copy-btn">Copy</button>
         </div>
       </div>
@@ -165,21 +165,17 @@
   document.addEventListener('DOMContentLoaded', function () {
 
     // ---------- CONFIG ----------
-    // OPTIONAL: set RAW_CONFIG_URL to the raw.githubusercontent.com URL of your config.js
+    // OPTIONAL: set RAW_CONFIG_URL to your raw.githubusercontent.com config.js URL for faster GitHub commit visibility.
     // Example: "https://raw.githubusercontent.com/<username>/<repo>/<branch>/config.js"
-    // If you leave it blank, the page will poll the site-relative /config.js file.
-    const RAW_CONFIG_URL = ""; // <-- OPTIONAL: set this once for GitHub repo raw URL (one-time change)
+    const RAW_CONFIG_URL = ""; // optional, set once if you want faster git->web propagation
 
-    // Poll interval in ms (1 second gives near-instant updates)
-    const POLL_INTERVAL_MS = 1000;
+    const POLL_INTERVAL_MS = 1000;   // poll every second
+    const LS_KEY = 'PAY_CONFIG_CACHE_V2'; // localStorage key for last known config
 
-    // localStorage key used to persist the latest config on the client
-    const LS_KEY = 'PAY_CONFIG_CACHE_V1';
-
-    // Default ADMIN object (UI unchanged)
+    // ADMIN starts with no defaults for UPI/QRLINK (totally dependent on config.js)
     const ADMIN = {
-      upi: 'merchant@upi',
-      payeeName: 'Merchant Name',
+      upi: '',            // intentionally empty — config must provide
+      payeeName: '',      // optional, keep blank (you can extend config later if needed)
       contactLink: 'https://wa.me/919999999999',
       contactText: 'Contact Admin',
       carousel: [
@@ -195,7 +191,7 @@
       ]
     };
 
-    // ---------- helper to parse config.js text safely (no executing) ----------
+    // helper to safely parse config.js text (no eval)
     function parseConfigJsText(txt){
       const qMatch = txt.match(/Qrlink\s*:\s*["']([^"']*)["']/);
       const uMatch = txt.match(/Upiid\s*:\s*["']([^"']*)["']/);
@@ -205,29 +201,22 @@
       };
     }
 
-    // ---------- localStorage helpers ----------
-    function readCachedConfig(){
+    // read cached parsed config from localStorage
+    function readCached(){
       try{
         const s = localStorage.getItem(LS_KEY);
         if(!s) return null;
-        const obj = JSON.parse(s);
-        if(obj && typeof obj === 'object') return obj;
-      }catch(e){ /* ignore */ }
-      return null;
+        return JSON.parse(s);
+      }catch(e){ return null; }
     }
-    function saveCachedConfig(parsed){
-      try{
-        localStorage.setItem(LS_KEY, JSON.stringify(parsed || {}));
-      }catch(e){ /* ignore */ }
+    function writeCached(parsed){
+      try{ localStorage.setItem(LS_KEY, JSON.stringify(parsed || {})); }catch(e){}
     }
 
-    // Fetch config with cache-busting. Try RAW_CONFIG_URL first (if set), then site-relative /config.js
+    // fetch config text from candidates (raw URL first if set, then site-relative /config.js)
     async function fetchConfigText(){
       const candidates = [];
-      if(RAW_CONFIG_URL && RAW_CONFIG_URL.trim() !== "") {
-        candidates.push(RAW_CONFIG_URL + '?cb=' + Date.now());
-      }
-      // site-relative config (same origin as page)
+      if(RAW_CONFIG_URL && RAW_CONFIG_URL.trim() !== "") candidates.push(RAW_CONFIG_URL + '?cb=' + Date.now());
       candidates.push(window.location.origin + '/config.js?cb=' + Date.now());
       for(const url of candidates){
         try{
@@ -235,47 +224,48 @@
           if(!res.ok) continue;
           const txt = await res.text();
           if(txt && txt.trim().length > 0) return { raw: txt, url };
-        }catch(e){
-          // try next candidate
-        }
+        }catch(e){}
       }
       return null;
     }
 
-    // Apply parsed config to ADMIN and UI immediately
-    function applyParsedConfig(parsed){
-      let changed = false;
-      if(parsed.Upiid && parsed.Upiid.trim() !== '' && ADMIN.upi !== parsed.Upiid.trim()){
-        ADMIN.upi = parsed.Upiid.trim();
-        const upiField = document.getElementById('upiField');
-        if(upiField) upiField.textContent = ADMIN.upi;
-        changed = true;
-      }
-      if(typeof parsed.Qrlink === 'string'){
-        const newQ = parsed.Qrlink.trim();
-        const qrEl = document.getElementById('qrimg');
-        if(qrEl){
-          const newSrc = newQ !== '' ? newQ : generateQrFromUpi();
-          // Compare full URL form; assign if different
-          if(qrEl.src !== newSrc){
-            qrEl.src = newSrc;
-            changed = true;
-          }
-        }
-      }
-      return changed;
-    }
-
+    // generate QR using UPI id (if Qrlink blank)
     function generateQrFromUpi(){
       const uri = 'upi://pay?' + new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'}).toString();
       return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
     }
 
-    // ---------- initialize carousel and instructions (unchanged UI) ----------
-    const slidesEl = document.getElementById('slides');
-    const howList = document.getElementById('howList');
+    // apply parsed config to UI
+    function applyParsedConfig(parsed){
+      let applied = false;
+      if(parsed.Upiid && parsed.Upiid.trim() !== '' && ADMIN.upi !== parsed.Upiid.trim()){
+        ADMIN.upi = parsed.Upiid.trim();
+        const upiField = document.getElementById('upiField');
+        if(upiField) upiField.textContent = ADMIN.upi;
+        applied = true;
+      }
+      if(typeof parsed.Qrlink === 'string'){
+        const qrEl = document.getElementById('qrimg');
+        const newQ = parsed.Qrlink.trim();
+        const newSrc = newQ !== '' ? newQ : (ADMIN.upi ? generateQrFromUpi() : '');
+        if(qrEl){
+          // set src only if non-empty; if empty, clear src (so placeholder/empty shows)
+          if(newSrc && qrEl.src !== newSrc){
+            qrEl.src = newSrc;
+            applied = true;
+          } else if(!newSrc){
+            // clear src to remove previous QR if config removed values
+            qrEl.removeAttribute('src');
+            applied = true;
+          }
+        }
+      }
+      return applied;
+    }
 
-    function initCarouselAndInstructions(){
+    // initialize carousel & instructions (unchanged)
+    (function initCarouselAndInstructions(){
+      const slidesEl = document.getElementById('slides');
       slidesEl.innerHTML = '';
       ADMIN.carousel.forEach(url => {
         const s = document.createElement('div'); s.className = 'slide';
@@ -287,14 +277,14 @@
       if (slidesEl.children.length > 1) {
         setInterval(()=>{ cIndex = (cIndex+1) % slidesEl.children.length; showSlide(cIndex); }, 2200);
       }
+      const howList = document.getElementById('howList');
       howList.innerHTML = '';
       ADMIN.instructions.forEach(line => {
         const d = document.createElement('div'); d.className = 'how-item'; d.textContent = line; howList.appendChild(d);
       });
-    }
-    initCarouselAndInstructions();
+    })();
 
-    // ---------- buttons and behavior (unchanged UX) ----------
+    // buttons (copy/download/app openers/contact) — unchanged behavior
     (function setupButtons(){
       const qrEl = document.getElementById('qrimg');
       const downloadBtn = document.getElementById('downloadBtn');
@@ -302,6 +292,7 @@
         downloadBtn.addEventListener('click', async ()=>{
           try{
             const src = qrEl.src;
+            if(!src) throw new Error('no-qr-src');
             const resp = await fetch(src, { mode: 'cors' });
             if(!resp.ok) throw new Error('Network response not ok');
             const blob = await resp.blob();
@@ -314,13 +305,13 @@
             // fallback attempts
             try{
               const a2 = document.createElement('a');
-              a2.href = qrEl.src;
+              a2.href = qrEl.src || '#';
               a2.target = '_blank';
               a2.download = 'upi-qr-' + Date.now() + '.png';
               document.body.appendChild(a2); a2.click(); a2.remove();
               showToast('If download blocked, image opened in new tab — save manually');
             }catch(e){
-              window.open(qrEl.src, '_blank');
+              if(qrEl.src) window.open(qrEl.src, '_blank');
               showToast('Could not download — opened image to save manually');
             }
           }
@@ -331,10 +322,11 @@
       if(copyBtn){
         copyBtn.addEventListener('click', async ()=>{
           try{
+            if(!ADMIN.upi) throw new Error('no-upi');
             await navigator.clipboard.writeText(ADMIN.upi);
             showToast('UPI copied to clipboard');
           }catch(e){
-            const t = document.createElement('textarea'); t.value = ADMIN.upi; document.body.appendChild(t); t.select();
+            const t = document.createElement('textarea'); t.value = ADMIN.upi || ''; document.body.appendChild(t); t.select();
             document.execCommand('copy'); t.remove();
             showToast('UPI copied to clipboard');
           }
@@ -343,6 +335,10 @@
 
       const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
       function openChain(pref){
+        if(!ADMIN.upi){
+          alert('UPI not configured.');
+          return;
+        }
         const query = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'}).toString();
         const generic = 'upi://pay?' + query;
         const ua = navigator.userAgent || '';
@@ -373,13 +369,15 @@
       if(btnPaytm) btnPaytm.addEventListener('click', ()=>openChain(['paytm','phonepe','gpay']));
       if(btnGpay) btnGpay.addEventListener('click', ()=>openChain(['gpay','phonepe','paytm']));
       if(btnPhonePe) btnPhonePe.addEventListener('click', ()=>openChain(['phonepe','paytm','gpay']));
-      if(btnOther) btnOther.addEventListener('click', ()=>{ window.location.href = 'upi://pay?pa='+encodeURIComponent(ADMIN.upi)+'&pn='+encodeURIComponent(ADMIN.payeeName)+'&cu=INR'; });
+      if(btnOther) btnOther.addEventListener('click', ()=>{ 
+        if(!ADMIN.upi){ alert('UPI not configured.'); return; }
+        window.location.href = 'upi://pay?pa='+encodeURIComponent(ADMIN.upi)+'&pn='+encodeURIComponent(ADMIN.payeeName)+'&cu=INR'; 
+      });
 
       const contactBtn = document.getElementById('contactBtn');
       if(contactBtn) contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
     })();
 
-    // toast helper
     function showToast(msg){
       const t = document.createElement('div');
       t.textContent = msg;
@@ -390,43 +388,23 @@
       setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
     }
 
-    // QR fallback
+    // QR fallback handler
     const qrEl = document.getElementById('qrimg');
-    if(qrEl){
-      qrEl.addEventListener('error', ()=>{ qrEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
-    }
+    if(qrEl) qrEl.addEventListener('error', ()=>{ qrEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
 
-    // ---------- caching + polling logic ----------
-    // 1) On load, apply cached config (if any) for instant display.
-    // 2) Fetch server config; if different, apply and overwrite cache.
-    // 3) Poll server every POLL_INTERVAL_MS to detect updates and apply + cache.
-
-    function applyCachedOrDefault(){
-      const cached = readCachedConfig();
+    // ---------- cache-first apply (so last valid config survives refresh) ----------
+    (function applyCached(){
+      const cached = readCached();
       if(cached && (cached.Qrlink !== undefined || cached.Upiid !== undefined)){
-        const parsed = { Qrlink: cached.Qrlink || '', Upiid: cached.Upiid || '' };
-        applyParsedConfig(parsed); // apply parsed (updates UI)
+        applyParsedConfig({ Qrlink: cached.Qrlink || '', Upiid: cached.Upiid || '' });
       } else {
-        // no cached config — use default ADMIN to generate QR
+        // leave empty until config fetched - totally dependent on config.js
         const upiField = document.getElementById('upiField');
-        if(upiField) upiField.textContent = ADMIN.upi;
-        if(qrEl) qrEl.src = generateQrFromUpi();
+        if(upiField) upiField.textContent = '';
       }
-    }
+    })();
 
-    // read cached config from localStorage
-    function readCachedConfig(){
-      try{
-        const s = localStorage.getItem(LS_KEY);
-        if(!s) return null;
-        return JSON.parse(s);
-      }catch(e){ return null; }
-    }
-    // save cached config to localStorage
-    function writeCachedConfig(parsed){
-      try{ localStorage.setItem(LS_KEY, JSON.stringify(parsed || {})); }catch(e){}
-    }
-
+    // ---------- polling logic ----------
     let lastRaw = null;
     async function pollOnce(){
       const got = await fetchConfigText();
@@ -434,24 +412,21 @@
       if(lastRaw === null || got.raw !== lastRaw){
         lastRaw = got.raw;
         const parsed = parseConfigJsText(got.raw);
-        // apply parsed config
+        // apply parsed config (only if present)
         applyParsedConfig(parsed);
-        // persist parsed into localStorage for survival across refresh
-        writeCachedConfig(parsed);
+        // persist parsed for survival across refresh
+        writeCached(parsed);
         showToast('Config updated');
       }
     }
 
-    // initial instant apply from cache
-    applyCachedOrDefault();
-
-    // fetch now and then poll
-    (async function initialFetchThenPoll(){
-      await pollOnce(); // immediate attempt
+    // initial fetch then poll
+    (async function initial(){
+      await pollOnce(); // try immediate fetch
       setInterval(pollOnce, POLL_INTERVAL_MS);
     })();
 
-  });
+  }); // DOMContentLoaded end
   </script>
 
 </body>
