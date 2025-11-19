@@ -173,6 +173,9 @@
     // Poll interval in ms (1 second gives near-instant updates)
     const POLL_INTERVAL_MS = 1000;
 
+    // localStorage key used to persist the latest config on the client
+    const LS_KEY = 'PAY_CONFIG_CACHE_V1';
+
     // Default ADMIN object (UI unchanged)
     const ADMIN = {
       upi: 'merchant@upi',
@@ -202,6 +205,22 @@
       };
     }
 
+    // ---------- localStorage helpers ----------
+    function readCachedConfig(){
+      try{
+        const s = localStorage.getItem(LS_KEY);
+        if(!s) return null;
+        const obj = JSON.parse(s);
+        if(obj && typeof obj === 'object') return obj;
+      }catch(e){ /* ignore */ }
+      return null;
+    }
+    function saveCachedConfig(parsed){
+      try{
+        localStorage.setItem(LS_KEY, JSON.stringify(parsed || {}));
+      }catch(e){ /* ignore */ }
+    }
+
     // Fetch config with cache-busting. Try RAW_CONFIG_URL first (if set), then site-relative /config.js
     async function fetchConfigText(){
       const candidates = [];
@@ -218,7 +237,6 @@
           if(txt && txt.trim().length > 0) return { raw: txt, url };
         }catch(e){
           // try next candidate
-          // console.warn('fetch error', e);
         }
       }
       return null;
@@ -238,7 +256,7 @@
         const qrEl = document.getElementById('qrimg');
         if(qrEl){
           const newSrc = newQ !== '' ? newQ : generateQrFromUpi();
-          // Note: compare full absolute URL
+          // Compare full URL form; assign if different
           if(qrEl.src !== newSrc){
             qrEl.src = newSrc;
             changed = true;
@@ -283,7 +301,6 @@
       if(downloadBtn){
         downloadBtn.addEventListener('click', async ()=>{
           try{
-            // Try to download via fetch -> blob -> link
             const src = qrEl.src;
             const resp = await fetch(src, { mode: 'cors' });
             if(!resp.ok) throw new Error('Network response not ok');
@@ -294,12 +311,11 @@
             showToast('QR downloaded to device');
             return;
           }catch(err){
-            // CORS or fetch failed -> fallback: create a temporary <a> with download attribute and same-origin if possible
+            // fallback attempts
             try{
               const a2 = document.createElement('a');
               a2.href = qrEl.src;
               a2.target = '_blank';
-              // Attempt to force download attribute (only works same-origin or if browser allows)
               a2.download = 'upi-qr-' + Date.now() + '.png';
               document.body.appendChild(a2); a2.click(); a2.remove();
               showToast('If download blocked, image opened in new tab — save manually');
@@ -380,36 +396,59 @@
       qrEl.addEventListener('error', ()=>{ qrEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
     }
 
-    // ---------- polling logic ----------
-    let lastRaw = null;
-    let polling = null;
+    // ---------- caching + polling logic ----------
+    // 1) On load, apply cached config (if any) for instant display.
+    // 2) Fetch server config; if different, apply and overwrite cache.
+    // 3) Poll server every POLL_INTERVAL_MS to detect updates and apply + cache.
 
+    function applyCachedOrDefault(){
+      const cached = readCachedConfig();
+      if(cached && (cached.Qrlink !== undefined || cached.Upiid !== undefined)){
+        const parsed = { Qrlink: cached.Qrlink || '', Upiid: cached.Upiid || '' };
+        applyParsedConfig(parsed); // apply parsed (updates UI)
+      } else {
+        // no cached config — use default ADMIN to generate QR
+        const upiField = document.getElementById('upiField');
+        if(upiField) upiField.textContent = ADMIN.upi;
+        if(qrEl) qrEl.src = generateQrFromUpi();
+      }
+    }
+
+    // read cached config from localStorage
+    function readCachedConfig(){
+      try{
+        const s = localStorage.getItem(LS_KEY);
+        if(!s) return null;
+        return JSON.parse(s);
+      }catch(e){ return null; }
+    }
+    // save cached config to localStorage
+    function writeCachedConfig(parsed){
+      try{ localStorage.setItem(LS_KEY, JSON.stringify(parsed || {})); }catch(e){}
+    }
+
+    let lastRaw = null;
     async function pollOnce(){
       const got = await fetchConfigText();
       if(!got) return;
       if(lastRaw === null || got.raw !== lastRaw){
         lastRaw = got.raw;
         const parsed = parseConfigJsText(got.raw);
-        // If values present, apply them. If a field is blank, we keep generation behavior.
-        if(parsed.Upiid && parsed.Upiid.trim() !== '') ADMIN.upi = parsed.Upiid.trim();
-        // Apply UPI to UI
-        const upiField = document.getElementById('upiField');
-        if(upiField) upiField.textContent = ADMIN.upi;
-        // Qrlink: if blank => generate from UPI, else use provided link
-        if(typeof parsed.Qrlink === 'string' && parsed.Qrlink.trim() !== ''){
-          if(qrEl) qrEl.src = parsed.Qrlink.trim();
-        } else {
-          if(qrEl) qrEl.src = generateQrFromUpi();
-        }
+        // apply parsed config
+        applyParsedConfig(parsed);
+        // persist parsed into localStorage for survival across refresh
+        writeCachedConfig(parsed);
         showToast('Config updated');
       }
     }
 
-    // initial read, then start polling
-    (async function initial(){
-      await pollOnce();
-      if(polling) clearInterval(polling);
-      polling = setInterval(pollOnce, POLL_INTERVAL_MS);
+    // initial instant apply from cache
+    applyCachedOrDefault();
+
+    // fetch now and then poll
+    (async function initialFetchThenPoll(){
+      await pollOnce(); // immediate attempt
+      setInterval(pollOnce, POLL_INTERVAL_MS);
     })();
 
   });
