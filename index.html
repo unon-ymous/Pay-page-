@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    
+
+  </head>
+    
+  <body>
+  <!doctype html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -40,13 +50,13 @@
     .upi-text{font-size:15px;color:#0b1f2f}
     .copy-btn{padding:6px 10px;border-radius:8px;background:var(--copy-gray);color:#425066;border:0;cursor:pointer;font-weight:700}
 
-    /* apps (slightly darker than before as requested) */
+    /* apps - made slightly darker as requested */
     .apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow: 0 3px 8px rgba(2,6,23,0.03)}
-    .paytm{background:linear-gradient(90deg,#dbe9ff,#c3dbff);color:#012b4a}
-    .gpay{background:linear-gradient(90deg,#fffaf0,#fff7ed);color:#0b0b0b;border:1px solid rgba(0,0,0,0.08)}
-    .phonepe{background:linear-gradient(90deg,#eadcff,#e6dbff);color:#2b0050}
-    .other{background:linear-gradient(90deg,#cec8ff,#c4b9ff);color:#0d0b1a} /* darker */
+    .app-btn{padding:12px;border-radius:10px;border:0;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;filter:brightness(0.92)}
+    .paytm{background:linear-gradient(90deg,#e6f0ff,#cfe6ff);color:#003366}
+    .gpay{background:linear-gradient(90deg,#fff,#fff7ed);color:#111;border:1px solid rgba(0,0,0,0.06)}
+    .phonepe{background:linear-gradient(90deg,#f3e9ff,#efe2ff);color:#3a0b66}
+    .other{background:linear-gradient(90deg,#dcd6ff,#cfc6ff);color:#221f3a} /* darker */
 
     /* carousel + static header */
     .carousel-wrap{margin-top:12px}
@@ -102,44 +112,45 @@
     .contact-btn{padding:12px 18px;border-radius:8px;background:#f3f4f6;color:#111;border:0;font-weight:800;cursor:pointer}
     .contact-small{font-size:13px;color:var(--muted);text-align:center}
 
-    /* hidden admin touch area (invisible but clickable) */
-    .admin-hotspot{
-      position:fixed;
-      left:18px; /* near contact admin area as requested */
-      bottom:18px;
-      width:56px;
-      height:56px;
-      opacity:0; /* invisible */
-      z-index:99999;
-      /* keep pointer events enabled so it can be tapped */
-      cursor:pointer;
-    }
-
-    /* modal styles (password prompt and admin panel) */
-    .modal-backdrop{
-      position:fixed; inset:0; background:rgba(2,6,23,0.45); display:flex; align-items:center; justify-content:center; z-index:100000;
-    }
-    .modal{
-      width:92%;
-      max-width:480px;
-      background:#fff;
-      border-radius:12px;
-      box-shadow:0 20px 60px rgba(2,6,23,0.25);
-      padding:18px;
-    }
-    .modal h3{margin:0 0 8px 0;font-size:18px;color:#082034}
-    .modal .field{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-    .modal input[type="text"], .modal input[type="password"]{
-      padding:10px;border-radius:8px;border:1px solid rgba(8,12,20,0.06);font-size:14px;
-    }
-    .modal .row{display:flex;gap:8px;margin-top:12px}
+    /* modal / admin */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:none;align-items:center;justify-content:center;z-index:20000}
+    .modal{width:92%;max-width:420px;background:#fff;border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(2,6,23,0.3)}
+    .modal h3{margin:0 0 8px 0;font-size:18px}
+    .modal p{margin:0 0 12px 0;color:#475569}
+    .modal input[type="text"], .modal input[type="password"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(8,12,20,0.08);margin-bottom:10px;font-weight:700}
+    .modal .row{display:flex;gap:8px}
     .btn{padding:10px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:800}
-    .btn.primary{background:var(--accent);color:#fff}
-    .btn.ghost{background:#f3f4f6;color:#0b1622}
+    .btn-primary{background:linear-gradient(90deg,#0b61ff,#2a9bff);color:#fff}
+    .btn-ghost{background:#f3f4f6;color:#111}
+
+    /* small owner label below QR */
+    .qr-owner{font-weight:800;color:#0b1f2f;margin-top:8px;font-size:15px}
+
+    /* hidden admin tap area - invisible but clickable */
+    .hidden-admin {
+      position:fixed;
+      left:18px;
+      bottom:18px;
+      width:48px;
+      height:48px;
+      border-radius:8px;
+      opacity:0; /* invisible */
+      z-index:15000;
+      -webkit-tap-highlight-color: transparent; /* no highlight on mobile */
+      outline: none;
+      border: none;
+      background:transparent;
+      /* keep it clickable */
+      pointer-events:auto;
+      touch-action:manipulation;
+    }
+    /* prevent focus ring */
+    .hidden-admin:focus { outline: none; }
 
     @media (max-width:480px){
       .qr-frame{width:260px;height:260px}
       .title{font-size:22px}
+      .hidden-admin { left:12px; bottom:12px; width:44px; height:44px; }
     }
   </style>
 </head>
@@ -155,6 +166,9 @@
       <!-- QR area -->
       <div class="qr-wrap">
         <div class="qr-frame" id="qrframe"><img id="qrimg" src="" alt="QR image"></div>
+        <!-- owner name below QR (auto-generated from UPI) -->
+        <div class="qr-owner" id="qrOwner"></div>
+
         <div class="controls">
           <button id="downloadBtn" class="download">Download QR Code</button>
         </div>
@@ -197,61 +211,48 @@
     </div>
   </div>
 
-  <!-- Invisible hotspot for admin unlock (bottom-left near contact button) -->
-  <div id="adminHotspot" class="admin-hotspot" title="hidden admin hotspot"></div>
+  <!-- Hidden invisible admin tap area (bottom-left). Invisible, no visual feedback. -->
+  <button id="hiddenAdminTap" class="hidden-admin" aria-hidden="true" tabindex="-1"></button>
 
-  <!-- Password prompt modal (hidden) -->
-  <div id="pwModal" style="display:none;">
-    <div class="modal-backdrop" id="pwBackdrop">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pwTitle">
-        <h3 id="pwTitle">Enter Admin Password</h3>
-        <div class="field">
-          <input id="pwInput" type="password" placeholder="Password" />
-        </div>
-        <div class="row" style="justify-content:flex-end;">
-          <button id="pwCancel" class="btn ghost">Cancel</button>
-          <button id="pwSubmit" class="btn primary">Unlock</button>
-        </div>
+  <!-- MODALS -->
+  <!-- password prompt -->
+  <div id="pwdBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <h3>Enter Password</h3>
+      <p>Enter admin password to continue.</p>
+      <input id="pwdInput" type="password" placeholder="Password" autocomplete="off" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="pwdCancel" class="btn btn-ghost">Cancel</button>
+        <button id="pwdOk" class="btn btn-primary">OK</button>
       </div>
     </div>
   </div>
 
-  <!-- Admin panel modal (hidden) -->
-  <div id="adminModal" style="display:none;">
-    <div class="modal-backdrop" id="adminBackdrop">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
-        <h3 id="adminTitle">Admin Panel</h3>
-        <div style="color:#475569;font-size:13px;">Change QR image URL and UPI ID below. Click Save to apply.</div>
-
-        <div class="field">
-          <label style="font-weight:700;font-size:13px;margin-top:10px">QR image URL</label>
-          <input id="adminQrUrl" type="text" placeholder="https://i.example.com/qr.png" />
-        </div>
-
-        <div class="field">
-          <label style="font-weight:700;font-size:13px;margin-top:10px">UPI ID</label>
-          <input id="adminUpi" type="text" placeholder="merchant@upi" />
-        </div>
-
-        <div class="row" style="justify-content:flex-end;">
-          <button id="adminCancel" class="btn ghost">Cancel</button>
-          <button id="adminSave" class="btn primary">Save</button>
-        </div>
+  <!-- admin panel -->
+  <div id="adminBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <h3>Admin Panel</h3>
+      <p>Update UPI ID below (enter "Not Available" to show QR unavailable)</p>
+      <input id="adminUpi" type="text" placeholder="merchant@upi" />
+      <div class="row" style="margin-top:8px;">
+        <button id="adminSave" class="btn btn-primary">Save</button>
+        <button id="adminCancel" class="btn btn-ghost">Close</button>
       </div>
     </div>
   </div>
 
 <script>
 /* ================= ADMIN CONFIG =================
- * Default values (you can change here if you want)
+ * Original ADMIN object remains to preserve behavior.
+ * We'll update this object when admin saves new UPI.
  * ================================================= */
 const ADMIN = {
-  upi: 'merchant@upi',                // <-- your default UPI ID
-  payeeName: 'Merchant Name',         // <-- payee name
+  upi: 'merchant@upi',                // <-- your UPI ID (initial)
+  payeeName: 'Merchant Name',         // <-- payee name (initial)
   contactLink: 'https://wa.me/919999999999', // <-- your WhatsApp/Telegram link
   contactText: 'Contact Admin',
   carousel: [
-    // replace these with your tutorial images/screenshots
+    // keep the same example images you provided
     'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
     'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
     'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
@@ -261,43 +262,63 @@ const ADMIN = {
     'Confirm the UPI ID and payee name before approving.',
     'Enter the exact amount in your UPI app (do not rely on defaults).',
     'After payment, take a screenshot and send it to admin for confirmation.'
-  ],
-  // Optional: current QR image source (initially generated from UPI URI)
-  qrImageUrl: null
+  ]
 };
 /* ================================================= */
 
-/* Elements */
 const upiField = document.getElementById('upiField');
 const qrImg = document.getElementById('qrimg');
 const downloadBtn = document.getElementById('downloadBtn');
 const slidesEl = document.getElementById('slides');
 const howList = document.getElementById('howList');
 const contactBtn = document.getElementById('contactBtn');
-const contactSmall = document.getElementById('contactSmall');
+const qrOwner = document.getElementById('qrOwner');
 
-/* Set initial UI text */
 upiField.textContent = ADMIN.upi;
 contactBtn.textContent = (ADMIN.contactText || 'Contact Admin') + '  💬';
-contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
 
-/* Build UPI URI for generating QR (if no external QR image is set) */
-function buildUpiUri(){
-  const params = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'});
+/* UTIL: derive owner name from UPI id (before @), make readable */
+function deriveOwnerFromUpi(upi){
+  if(!upi) return '';
+  if(upi === 'Not Available') return '';
+  const parts = upi.split('@')[0] || upi;
+  // split on non letters/digits and capitalize words
+  const words = parts.split(/[\._\-]+/).filter(Boolean).map(w => {
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  });
+  const name = words.join(' ');
+  return name || ADMIN.payeeName || '';
+}
+
+/* Generate initial QR from UPI URI (no amount included so user enters in app) */
+function buildUpiUri(upi, payeeName){
+  const params = new URLSearchParams({pa:upi,pn:payeeName,cu:'INR'});
   return 'upi://pay?' + params.toString();
 }
-function initialQrSrc(){
-  // if ADMIN.qrImageUrl is set (non-null), use it; otherwise use generated Google Chart QR
-  if(ADMIN.qrImageUrl){
-    return ADMIN.qrImageUrl;
-  }
-  const uri = buildUpiUri();
+function qrDataUrlForUpi(upi, payeeName){
+  if(upi === 'Not Available') return null;
+  const uri = buildUpiUri(upi, payeeName);
+  // Use Google Chart API to generate QR (1000x1000 for quality)
   return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
 }
-/* Set initial QR image */
-qrImg.src = initialQrSrc();
+function showQrForAdminUpi(upi){
+  if(upi === 'Not Available'){
+    // show inline SVG "QR Unavailable"
+    qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>';
+    qrOwner.textContent = '';
+    return;
+  }
+  const owner = deriveOwnerFromUpi(upi) || ADMIN.payeeName || '';
+  const qrSrc = qrDataUrlForUpi(upi, owner);
+  qrImg.src = qrSrc;
+  // display owner name below QR
+  qrOwner.textContent = owner ? owner : '';
+}
 
-/* Populate carousel images */
+/* initial display */
+showQrForAdminUpi(ADMIN.upi);
+
+/* Populate carousel images (unchanged) */
 ADMIN.carousel.forEach(url => {
   const s = document.createElement('div'); s.className = 'slide';
   const img = document.createElement('img'); img.src = url; img.alt = 'step';
@@ -316,6 +337,7 @@ ADMIN.instructions.forEach(line => {
 async function downloadQr(){
   try{
     const src = qrImg.src;
+    // if QR unavailable (data svg), still download it
     const resp = await fetch(src, {mode:'cors'});
     if(!resp.ok) throw new Error('Network response not ok');
     const blob = await resp.blob();
@@ -336,7 +358,7 @@ function triggerDownload(blob, filename){
 }
 downloadBtn.addEventListener('click', downloadQr);
 
-/* Copy UPI to clipboard */
+/* Copy UPI to clipboard (Copy button inside same pill) */
 document.getElementById('copyUpi').addEventListener('click', async ()=>{
   try{
     await navigator.clipboard.writeText(ADMIN.upi);
@@ -378,7 +400,8 @@ document.getElementById('btnGpay').addEventListener('click', ()=>openChain(['gpa
 document.getElementById('btnPhonePe').addEventListener('click', ()=>openChain(['phonepe','paytm','gpay']));
 document.getElementById('btnOther').addEventListener('click', ()=>{ window.location.href = 'upi://pay?pa='+encodeURIComponent(ADMIN.upi)+'&pn='+encodeURIComponent(ADMIN.payeeName)+'&cu=INR'; });
 
-/* Contact button already wired above */
+/* Contact */
+contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
 
 /* small toast */
 function showToast(msg){
@@ -392,129 +415,131 @@ function showToast(msg){
 }
 
 /* fallback if QR fails to load */
-qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
+qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; qrOwner.textContent=''; });
 
-/* ================= Hidden admin unlock logic =================
- * - Invisible hotspot at bottom-left (adminHotspot)
- * - Tap/click 10 times to open password modal
- * - Password is "fassvord"
- * - On correct password, open admin panel modal
- * - Admin panel accepts QR image URL and UPI ID; Save updates the page immediately
- * ============================================================= */
+/* ================= Hidden Admin Tap Logic =================
+ * - Invisible button at bottom-left listens for taps/clicks.
+ * - It counts taps silently. After 10 taps it opens password modal.
+ * - The hidden area has no visual feedback, no highlight, no focus ring.
+ * ======================================================== */
 
-const hotspot = document.getElementById('adminHotspot');
-const pwModal = document.getElementById('pwModal');
-const adminModal = document.getElementById('adminModal');
-const pwInput = document.getElementById('pwInput');
-const pwSubmit = document.getElementById('pwSubmit');
-const pwCancel = document.getElementById('pwCancel');
-const adminQrUrl = document.getElementById('adminQrUrl');
+const HIDDEN_BTN = document.getElementById('hiddenAdminTap');
+let tapCount = 0;
+let tapTimer = null;
+const TAP_TIMEOUT = 4000; // reset after 4s of inactivity (optional)
+
+function resetTapCount(){
+  tapCount = 0;
+  if(tapTimer){ clearTimeout(tapTimer); tapTimer = null; }
+}
+
+/* We intentionally do not add any visual feedback inside this handler.
+   It increments count silently and only triggers password modal on id 10 */
+HIDDEN_BTN.addEventListener('click', (ev)=>{
+  ev.stopPropagation && ev.stopPropagation();
+  ev.preventDefault && ev.preventDefault();
+  tapCount++;
+  // reset timer
+  if(tapTimer) clearTimeout(tapTimer);
+  tapTimer = setTimeout(()=>{ resetTapCount(); }, TAP_TIMEOUT);
+  if(tapCount >= 10){
+    resetTapCount();
+    openPasswordModal();
+  }
+}, {passive:false});
+
+/* Prevent accidental pointer styles or mobile highlights */
+HIDDEN_BTN.addEventListener('touchstart', (e)=>{ e.preventDefault && e.preventDefault(); }, {passive:false});
+
+/* ================= Password Modal / Admin Modal ================= */
+const pwdBackdrop = document.getElementById('pwdBackdrop');
+const pwdInput = document.getElementById('pwdInput');
+const pwdOk = document.getElementById('pwdOk');
+const pwdCancel = document.getElementById('pwdCancel');
+
+const adminBackdrop = document.getElementById('adminBackdrop');
 const adminUpi = document.getElementById('adminUpi');
 const adminSave = document.getElementById('adminSave');
 const adminCancel = document.getElementById('adminCancel');
-const pwBackdrop = document.getElementById('pwBackdrop');
-const adminBackdrop = document.getElementById('adminBackdrop');
 
-let clickCount = 0;
-const REQUIRED_TAPS = 10;
-const ADMIN_PASSWORD = 'fassvord';
-
-/* Increment on each tap/click */
-hotspot.addEventListener('click', (e)=>{
-  clickCount++;
-  // small visual debug can be enabled by console
-  // console.log('admin hotspot clicks', clickCount);
-  if(clickCount >= REQUIRED_TAPS){
-    clickCount = 0; // reset
-    openPasswordModal();
-  }
-});
-
-/* Show/hide helpers */
 function openPasswordModal(){
-  pwInput.value = '';
-  pwModal.style.display = 'block';
+  pwdInput.value = '';
+  pwdBackdrop.style.display = 'flex';
+  // no focus outline shown, but focus input for convenience (owner)
+  setTimeout(()=>pwdInput.focus && pwdInput.focus(), 80);
 }
-function closePasswordModal(){
-  pwModal.style.display = 'none';
-}
-function openAdminModal(){
-  // prefill admin modal fields with current values
-  adminQrUrl.value = ADMIN.qrImageUrl || ''; // if null, empty
-  adminUpi.value = ADMIN.upi || '';
-  adminModal.style.display = 'block';
-}
-function closeAdminModal(){
-  adminModal.style.display = 'none';
-}
+function closePasswordModal(){ pwdBackdrop.style.display = 'none'; pwdInput.value = ''; }
 
-/* Password modal actions */
-pwCancel.addEventListener('click', ()=>{
-  closePasswordModal();
-});
-pwBackdrop && pwBackdrop.addEventListener('click', (ev)=>{
-  // clicking backdrop (outside modal) closes password prompt
-  if(ev.target === pwBackdrop) closePasswordModal();
-});
-pwSubmit.addEventListener('click', ()=>{
-  const v = pwInput.value || '';
-  if(v === ADMIN_PASSWORD){
+function openAdminModal(){
+  // prefill with current UPI
+  adminUpi.value = ADMIN.upi || '';
+  adminBackdrop.style.display = 'flex';
+  setTimeout(()=>adminUpi.focus && adminUpi.focus(), 80);
+}
+function closeAdminModal(){ adminBackdrop.style.display = 'none'; adminUpi.value = ''; }
+
+// password handling (password is "fassvord")
+pwdOk.addEventListener('click', ()=>{
+  const val = pwdInput.value || '';
+  if(val === 'fassvord'){
     closePasswordModal();
     openAdminModal();
   } else {
-    showToast('Wrong password');
+    showToast('Incorrect password');
+    pwdInput.value = '';
+    setTimeout(()=>pwdInput.focus && pwdInput.focus(), 60);
   }
 });
-pwInput.addEventListener('keydown', (ev)=>{
-  if(ev.key === 'Enter') pwSubmit.click();
+pwdCancel.addEventListener('click', ()=>{ closePasswordModal(); });
+
+/* also allow Enter key on password */
+pwdInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ pwdOk.click(); }
 });
 
-/* Admin modal actions */
-adminCancel.addEventListener('click', ()=> closeAdminModal());
-adminBackdrop && adminBackdrop.addEventListener('click', (ev)=>{
-  if(ev.target === adminBackdrop) closeAdminModal();
-});
-
-/* Save changes from admin panel */
+/* Admin save: update ADMIN.upi, update displayed UPI text, regenerate QR & owner name */
 adminSave.addEventListener('click', ()=>{
-  const newQr = (adminQrUrl.value || '').trim();
   const newUpi = (adminUpi.value || '').trim();
-
-  // Update UPI if provided
-  if(newUpi){
-    ADMIN.upi = newUpi;
-    upiField.textContent = ADMIN.upi;
-    showToast('UPI updated');
+  if(!newUpi){
+    showToast('Please enter a UPI ID (or "Not Available")');
+    adminUpi.focus();
+    return;
   }
-
-  // Update QR image source:
-  // If admin provided a QR image URL, use it.
-  // If empty, revert to generating QR from the UPI (Google Chart API)
-  if(newQr){
-    ADMIN.qrImageUrl = newQr;
-    qrImg.src = newQr;
-    showToast('QR updated');
-  } else {
-    // clear external QR override
-    ADMIN.qrImageUrl = null;
-    qrImg.src = initialQrSrc();
-    showToast('QR set to generated UPI QR');
-  }
-
-  // Close admin panel after saving
+  // Update ADMIN object
+  ADMIN.upi = newUpi;
+  // derive owner name automatically from UPI
+  const derived = deriveOwnerFromUpi(newUpi);
+  ADMIN.payeeName = derived || ADMIN.payeeName || 'Merchant Name';
+  // update UI
+  upiField.textContent = ADMIN.upi;
+  showQrForAdminUpi(ADMIN.upi);
+  showToast('UPI updated');
   closeAdminModal();
 });
 
-/* Reset click count if user navigates away or after some idle time */
-let resetTimer = null;
-hotspot.addEventListener('click', ()=>{
-  if(resetTimer) clearTimeout(resetTimer);
-  resetTimer = setTimeout(()=>{ clickCount = 0; }, 4000); // reset after 4s idle
+/* adminCancel */
+adminCancel.addEventListener('click', ()=>{ closeAdminModal(); });
+
+/* close modals when clicking outside modal content */
+pwdBackdrop.addEventListener('click', (e)=>{
+  if(e.target === pwdBackdrop) closePasswordModal();
+});
+adminBackdrop.addEventListener('click', (e)=>{
+  if(e.target === adminBackdrop) closeAdminModal();
 });
 
-/* Ensure that when ADMIN.upi changes, any functionality using ADMIN.upi reflects it (already used directly) */
+/* allow Enter key in admin input to save */
+adminUpi.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ adminSave.click(); }
+});
 
-/* End of admin logic */
+/* ================= End Admin Logic ================= */
+
 </script>
 </body>
+</html>
+    
+    
+  </body>
+  
 </html>
