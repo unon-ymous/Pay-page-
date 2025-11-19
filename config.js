@@ -1,9 +1,5 @@
-// config.js
-// Edit ONLY these two values (Qrlink and Upiid).
-// Keep the key names and capitalization exactly as-is (Qrlink, Upiid).
-
 window.CONFIG = {
-  qrlink: "https://i.ibb.co/20NTn6by/1760690156.jpg",           // e.g. "/assets/qr.png"  or "https://yourdomain.com/qr.png"
-  upiid: "gpay-11237583818@okbizaxis"             // e.g. "merchant@upi"
+  qrlink: "https://i.ibb.co/KptWStnG/1756799447.jpg",
+  upiid: "paytm.s1tbcvt@pty"
 };
 
