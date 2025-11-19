@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8">
-    <title>Untitled</title>
-    
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
 
-  </head>
-    
-  <body>
-  <!doctype html>
+</head>
+  
+<body>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -26,7 +26,7 @@
       --light-gray:#f3f4f6;
       --copy-gray:#eef2f6;
     }
-    html,body{height:100%;Margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--page-bg);color:#0f1724}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--page-bg);color:#0f1724}
 
     /* container */
     .page{max-width:760px;margin:18px auto;padding:0 12px}
@@ -172,7 +172,7 @@
     </div>
   </div>
 
-<!-- LOAD CONFIG (new file) -->
+<!-- Load config.js here. Place config.js file in same directory as index.html -->
 <script src="config.js"></script>
 
 <script>
@@ -180,7 +180,7 @@
  * Change the values below to your real UPI, payee name and contact link.
  * ================================================= */
 const ADMIN = {
-  upi: 'merchant@upi',                // <-- your UPI ID
+  upi: 'merchant@upi',                // <-- your UPI ID (default)
   payeeName: 'Merchant Name',         // <-- payee name
   contactLink: 'https://wa.me/919999999999', // <-- your WhatsApp/Telegram link
   contactText: 'Contact Admin',
@@ -201,23 +201,28 @@ const ADMIN = {
 };
 /* ================================================= */
 
-/* ====== small integration with config.js (if present) ======
-   - If config.js sets CONFIG.Upiid, it will override ADMIN.upi
-   - If config.js sets CONFIG.Qrlink, that URL will be used for the QR image
-     (and also replaces the first carousel image if you want it to)
-   These lines are intentionally minimal and non-invasive.
-   ========================================================= */
-if (typeof window.CONFIG !== 'undefined' && window.CONFIG) {
-  if (window.CONFIG.Upiid) {
-    ADMIN.upi = window.CONFIG.Upiid;
+/* --------- New: override ADMIN with values from config (if provided) ---------
+   config.js exposes window.PAY_CONFIG with:
+     PAY_CONFIG.Qrlink  (string)  -> direct QR image URL (optional)
+     PAY_CONFIG.Upiid   (string)  -> UPI ID (optional)
+   If Qrlink is present we'll use it for the big QR image; otherwise the
+   page will generate a QR from the UPI ID using Google Chart API.
+   --------------------------------------------------------------------------- */
+(function applyExternalConfig(){
+  try{
+    if(window.PAY_CONFIG && typeof window.PAY_CONFIG === 'object'){
+      const cfg = window.PAY_CONFIG;
+      if(cfg.Upiid && cfg.Upiid.trim() !== '') ADMIN.upi = cfg.Upiid.trim();
+      // We keep ADMIN.carousel and ADMIN.instructions intact (UI unchanged).
+      // The Qrlink is consumed later when setting qrImg.src.
+      // Store the Qrlink on ADMIN for easier use below:
+      if(cfg.Qrlink && cfg.Qrlink.trim() !== '') ADMIN._QRLINK = cfg.Qrlink.trim();
+    }
+  }catch(e){
+    // silently ignore config errors to preserve original behavior
+    console.warn('Config apply error', e);
   }
-  if (window.CONFIG.Qrlink) {
-    // use config qrlink as the displayed QR image
-    // also optionally replace first carousel item so screenshots/tutorials can match
-    ADMIN.carousel[0] = window.CONFIG.Qrlink;
-  }
-}
-/* ========================================================= */
+})();
 
 const upiField = document.getElementById('upiField');
 const qrImg = document.getElementById('qrimg');
@@ -239,8 +244,13 @@ function initialQrSrc(){
   // Use Google Chart API to generate QR (1000x1000 for quality)
   return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
 }
-/* set QR image: prefer CONFIG.Qrlink if provided, otherwise generate from upi */
-qrImg.src = (window.CONFIG && window.CONFIG.Qrlink) ? window.CONFIG.Qrlink : initialQrSrc();
+
+/* If config supplied a QRLINK, use that; otherwise generate from UPI */
+if(ADMIN._QRLINK){
+  qrImg.src = ADMIN._QRLINK;
+} else {
+  qrImg.src = initialQrSrc();
+}
 
 /* Populate carousel images */
 ADMIN.carousel.forEach(url => {
@@ -345,7 +355,7 @@ mlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" he
 </script>
 </body>
 </html>
-    
-  </body>
+  
+</body>
   
 </html>
