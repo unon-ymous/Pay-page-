@@ -1,16 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <title>Untitled</title>
-  
-
-</head>
-  
-<body>
-<!doctype html>
-<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -172,190 +161,204 @@
     </div>
   </div>
 
-<!-- Load config.js here. Place config.js file in same directory as index.html -->
-<script src="config.js"></script>
+  <!-- load config first -->
+  <script src="config.js"></script>
 
-<script>
-/* ================= ADMIN CONFIG =================
- * Change the values below to your real UPI, payee name and contact link.
- * ================================================= */
-const ADMIN = {
-  upi: 'merchant@upi',                // <-- your UPI ID (default)
-  payeeName: 'Merchant Name',         // <-- payee name
-  contactLink: 'https://wa.me/919999999999', // <-- your WhatsApp/Telegram link
-  contactText: 'Contact Admin',
-  carousel: [
-    // replace these with your tutorial images/screenshots
-    'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
+  <script>
+  // Wait for DOM to be ready
+  document.addEventListener('DOMContentLoaded', function () {
 
-'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
+    // Default ADMIN config (kept same as before)
+    const ADMIN = {
+      upi: 'merchant@upi',
+      payeeName: 'Merchant Name',
+      contactLink: 'https://wa.me/919999999999',
+      contactText: 'Contact Admin',
+      carousel: [
+        'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
+        'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
+        'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
+      ],
+      instructions: [
+        'Open any UPI app or scan the QR with your UPI app.',
+        'Confirm the UPI ID and payee name before approving.',
+        'Enter the exact amount in your UPI app (do not rely on defaults).',
+        'After payment, take a screenshot and send it to admin for confirmation.'
+      ]
+    };
 
-'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
-  ],
-  instructions: [
-    'Open any UPI app or scan the QR with your UPI app.',
-    'Confirm the UPI ID and payee name before approving.',
-    'Enter the exact amount in your UPI app (do not rely on defaults).',
-    'After payment, take a screenshot and send it to admin for confirmation.'
-  ]
-};
-/* ================================================= */
-
-/* --------- New: override ADMIN with values from config (if provided) ---------
-   config.js exposes window.PAY_CONFIG with:
-     PAY_CONFIG.Qrlink  (string)  -> direct QR image URL (optional)
-     PAY_CONFIG.Upiid   (string)  -> UPI ID (optional)
-   If Qrlink is present we'll use it for the big QR image; otherwise the
-   page will generate a QR from the UPI ID using Google Chart API.
-   --------------------------------------------------------------------------- */
-(function applyExternalConfig(){
-  try{
-    if(window.PAY_CONFIG && typeof window.PAY_CONFIG === 'object'){
-      const cfg = window.PAY_CONFIG;
-      if(cfg.Upiid && cfg.Upiid.trim() !== '') ADMIN.upi = cfg.Upiid.trim();
-      // We keep ADMIN.carousel and ADMIN.instructions intact (UI unchanged).
-      // The Qrlink is consumed later when setting qrImg.src.
-      // Store the Qrlink on ADMIN for easier use below:
-      if(cfg.Qrlink && cfg.Qrlink.trim() !== '') ADMIN._QRLINK = cfg.Qrlink.trim();
+    // Safely apply external config if present
+    try {
+      if (window.PAY_CONFIG && typeof window.PAY_CONFIG === 'object') {
+        const cfg = window.PAY_CONFIG;
+        if (typeof cfg.Upiid === 'string' && cfg.Upiid.trim() !== '') {
+          ADMIN.upi = cfg.Upiid.trim();
+        }
+        if (typeof cfg.Qrlink === 'string' && cfg.Qrlink.trim() !== '') {
+          ADMIN._QRLINK = cfg.Qrlink.trim();
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading config.js', e);
     }
-  }catch(e){
-    // silently ignore config errors to preserve original behavior
-    console.warn('Config apply error', e);
-  }
-})();
 
-const upiField = document.getElementById('upiField');
-const qrImg = document.getElementById('qrimg');
-const downloadBtn = document.getElementById('downloadBtn');
-const slidesEl = document.getElementById('slides');
-const howList = document.getElementById('howList');
-const contactBtn = document.getElementById('contactBtn');
+    // Element refs
+    const upiField = document.getElementById('upiField');
+    const qrImg = document.getElementById('qrimg');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const slidesEl = document.getElementById('slides');
+    const howList = document.getElementById('howList');
+    const contactBtn = document.getElementById('contactBtn');
 
-upiField.textContent = ADMIN.upi;
-contactBtn.textContent = (ADMIN.contactText || 'Contact Admin') + '  💬';
+    // Show UPI
+    if (upiField) upiField.textContent = ADMIN.upi;
+    if (contactBtn) contactBtn.textContent = (ADMIN.contactText || 'Contact Admin') + '  💬';
 
-/* Generate initial QR from UPI URI (no amount included so user enters in app) */
-function buildUpiUri(){
-  const params = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'});
-  return 'upi://pay?' + params.toString();
-}
-function initialQrSrc(){
-  const uri = buildUpiUri();
-  // Use Google Chart API to generate QR (1000x1000 for quality)
-  return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
-}
-
-/* If config supplied a QRLINK, use that; otherwise generate from UPI */
-if(ADMIN._QRLINK){
-  qrImg.src = ADMIN._QRLINK;
-} else {
-  qrImg.src = initialQrSrc();
-}
-
-/* Populate carousel images */
-ADMIN.carousel.forEach(url => {
-  const s = document.createElement('div'); s.className = 'slide';
-  const img = document.createElement('img'); img.src = url; img.alt = 'step';
-  s.appendChild(img); slidesEl.appendChild(s);
-});
-let cIndex = 0;
-function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
-setInterval(()=>{ cIndex = (cIndex+1) % ADMIN.carousel.length; showSlide(cIndex); }, 2200);
-
-/* Populate instructions (smaller text) */
-ADMIN.instructions.forEach(line => {
-  const d = document.createElement('div'); d.className = 'how-item'; d.textContent = line; howList.appendChild(d);
-});
-
-/* Download QR: fetch -> blob -> download (best-effort) */
-async function downloadQr(){
-  try{
-    const src = qrImg.src;
-    // fetch the image (works for data URLs and CORS-allowed hosts)
-    const resp = await fetch(src, {mode:'cors'});
-    if(!resp.ok) throw new Error('Network response not ok');
-    const blob = await resp.blob();
-    triggerDownload(blob, 'upi-qr-' + Date.now() + '.png');
-    showToast('QR downloaded to device');
-  }catch(err){
-    console.warn('Download failed, fallback to open', err);
-    // fallback: open image (user can long-press to save)
-    window.open(qrImg.src, '_blank');
-    showToast('Could not download directly — opened image to save manually');
-  }
-}
-function triggerDownload(blob, filename){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-}
-downloadBtn.addEventListener('click', downloadQr);
-
-/* Copy UPI to clipboard (Copy button inside same pill) */
-document.getElementById('copyUpi').addEventListener('click', async ()=>{
-  try{
-    await navigator.clipboard.writeText(ADMIN.upi);
-    showToast('UPI copied to clipboard');
-  }catch(e){
-    const t = document.createElement('textarea'); t.value = ADMIN.upi; document.body.appendChild(t); t.select();
-    document.execCommand('copy'); t.remove();
-    showToast('UPI copied to clipboard');
-  }
-});
-
-/* App openers (no amount passed) */
-const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
-function openChain(pref){
-  const query = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'}).toString();
-  const generic = 'upi://pay?' + query;
-  const ua = navigator.userAgent || '';
-  const isAndroid = /Android/i.test(ua);
-  const isIOS = /iPhone|iPad|iPod/i.test(ua);
-  if(isAndroid){
-    let i = 0;
-    function next(){
-      if(i >= pref.length){ window.location.href = generic; return; }
-      const key = pref[i++]; const pkg = PACK[key];
-      if(!pkg){ next(); return; }
-      const intent = `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`;
-      window.location.href = intent;
-      setTimeout(next, 1200);
+    // Build UPI URI for QR generation fallback
+    function buildUpiUri() {
+      const params = new URLSearchParams({ pa: ADMIN.upi, pn: ADMIN.payeeName, cu: 'INR' });
+      return 'upi://pay?' + params.toString();
     }
-    next();
-  } else if(isIOS){
-    window.location.href = generic;
-  } else {
-    alert('Open this page on a mobile device to complete the UPI payment.');
-  }
-}
-document.getElementById('btnPaytm').addEventListener('click', ()=>openChain(['paytm','phonepe','gpay']));
-document.getElementById('btnGpay').addEventListener('click', ()=>openChain(['gpay','phonepe','paytm']));
-document.getElementById('btnPhonePe').addEventListener('click', ()=>openChain(['phonepe','paytm','gpay']));
-document.getElementById('btnOther').addEventListener('click', ()=>{ window.location.href = 'upi://pay?pa='+encodeURIComponent(ADMIN.upi)+'&pn='+encodeURIComponent(ADMIN.payeeName)+'&cu=INR'; });
+    function initialQrSrc() {
+      const uri = buildUpiUri();
+      return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
+    }
 
-/* Contact */
-contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
+    // Set QR src: config Qrlink wins, otherwise generated from UPI
+    if (ADMIN._QRLINK) {
+      qrImg.src = ADMIN._QRLINK;
+    } else {
+      qrImg.src = initialQrSrc();
+    }
 
-/* small toast */
-function showToast(msg){
-  const t = document.createElement('div');
-  t.textContent = msg;
-  t.style.position='fixed'; t.style.left='50%'; t.style.bottom='22px'; t.style.transform='translateX(-50%)';
-  t.style.background='rgba(11,97,255,0.95)'; t.style.color='#fff'; t.style.padding='8px 12px';
-  t.style.borderRadius='8px'; t.style.boxShadow='0 8px 20px rgba(11,97,255,0.12)'; t.style.zIndex=9999;
-  document.body.appendChild(t);
-  setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
-}
+    // Populate carousel safely
+    slidesEl.innerHTML = ''; // clear
+    if (Array.isArray(ADMIN.carousel) && ADMIN.carousel.length > 0) {
+      ADMIN.carousel.forEach(url => {
+        const s = document.createElement('div'); s.className = 'slide';
+        const img = document.createElement('img'); img.src = url; img.alt = 'step';
+        s.appendChild(img); slidesEl.appendChild(s);
+      });
+    } else {
+      // placeholder if no images provided
+      const s = document.createElement('div'); s.className = 'slide';
+      const img = document.createElement('img');
+      img.alt = 'no steps';
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="340"><rect width="100%" height="100%" fill="#fff"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="18">No tutorial images</text></svg>';
+      s.appendChild(img); slidesEl.appendChild(s);
+    }
 
-/* fallback if QR fails to load */
-qrImg.addEventListener('error', ()=>{ qrImg.src = 'data:image/svg+xml;utf8,<svg x
-mlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
+    // Carousel behavior
+    let cIndex = 0;
+    function showSlide(i) { slidesEl.style.transform = `translateX(-${i * 100}%)`; }
+    // Start interval only if more than 1 slide
+    if (slidesEl.children.length > 1) {
+      setInterval(() => { cIndex = (cIndex + 1) % slidesEl.children.length; showSlide(cIndex); }, 2200);
+    }
 
-</script>
+    // Populate instructions
+    howList.innerHTML = '';
+    if (Array.isArray(ADMIN.instructions)) {
+      ADMIN.instructions.forEach(line => {
+        const d = document.createElement('div'); d.className = 'how-item'; d.textContent = line; howList.appendChild(d);
+      });
+    }
+
+    // Download QR: fetch -> blob -> download
+    async function downloadQr() {
+      try {
+        const src = qrImg.src;
+        const resp = await fetch(src, { mode: 'cors' });
+        if (!resp.ok) throw new Error('Network response not ok');
+        const blob = await resp.blob();
+        triggerDownload(blob, 'upi-qr-' + Date.now() + '.png');
+        showToast('QR downloaded to device');
+      } catch (err) {
+        console.warn('Download failed, fallback to open', err);
+        window.open(qrImg.src, '_blank');
+        showToast('Could not download directly — opened image to save manually');
+      }
+    }
+    function triggerDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadQr);
+
+    // Copy UPI
+    const copyBtn = document.getElementById('copyUpi');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(ADMIN.upi);
+          showToast('UPI copied to clipboard');
+        } catch (e) {
+          const t = document.createElement('textarea'); t.value = ADMIN.upi; document.body.appendChild(t); t.select();
+          document.execCommand('copy'); t.remove();
+          showToast('UPI copied to clipboard');
+        }
+      });
+    }
+
+    // App openers
+    const PACK = { gpay: 'com.google.android.apps.nbu.paisa.user', phonepe: 'com.phonepe.app', paytm: 'net.one97.paytm' };
+    function openChain(pref) {
+      const query = new URLSearchParams({ pa: ADMIN.upi, pn: ADMIN.payeeName, cu: 'INR' }).toString();
+      const generic = 'upi://pay?' + query;
+      const ua = navigator.userAgent || '';
+      const isAndroid = /Android/i.test(ua);
+      const isIOS = /iPhone|iPad|iPod/i.test(ua);
+      if (isAndroid) {
+        let i = 0;
+        function next() {
+          if (i >= pref.length) { window.location.href = generic; return; }
+          const key = pref[i++]; const pkg = PACK[key];
+          if (!pkg) { next(); return; }
+          const intent = `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`;
+          window.location.href = intent;
+          setTimeout(next, 1200);
+        }
+        next();
+      } else if (isIOS) {
+        window.location.href = generic;
+      } else {
+        alert('Open this page on a mobile device to complete the UPI payment.');
+      }
+    }
+
+    const btnPaytm = document.getElementById('btnPaytm');
+    const btnGpay = document.getElementById('btnGpay');
+    const btnPhonePe = document.getElementById('btnPhonePe');
+    const btnOther = document.getElementById('btnOther');
+
+    if (btnPaytm) btnPaytm.addEventListener('click', () => openChain(['paytm', 'phonepe', 'gpay']));
+    if (btnGpay) btnGpay.addEventListener('click', () => openChain(['gpay', 'phonepe', 'paytm']));
+    if (btnPhonePe) btnPhonePe.addEventListener('click', () => openChain(['phonepe', 'paytm', 'gpay']));
+    if (btnOther) btnOther.addEventListener('click', () => { window.location.href = 'upi://pay?pa=' + encodeURIComponent(ADMIN.upi) + '&pn=' + encodeURIComponent(ADMIN.payeeName) + '&cu=INR'; });
+
+    // Contact
+    if (contactBtn) contactBtn.addEventListener('click', () => window.open(ADMIN.contactLink, '_blank'));
+
+    // small toast
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.position = 'fixed'; t.style.left = '50%'; t.style.bottom = '22px'; t.style.transform = 'translateX(-50%)';
+      t.style.background = 'rgba(11,97,255,0.95)'; t.style.color = '#fff'; t.style.padding = '8px 12px';
+      t.style.borderRadius = '8px'; t.style.boxShadow = '0 8px 20px rgba(11,97,255,0.12)'; t.style.zIndex = 9999;
+      document.body.appendChild(t);
+      setTimeout(() => t.style.opacity = '0.01', 1500); setTimeout(() => t.remove(), 2000);
+    }
+
+    // fallback if QR fails to load
+    qrImg.addEventListener('error', () => {
+      qrImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>';
+    });
+
+  }); // DOMContentLoaded end
+  </script>
+
 </body>
-</html>
-  
-</body>
-  
 </html>
