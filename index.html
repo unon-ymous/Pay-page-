@@ -49,47 +49,46 @@
 
     /* carousel + static header */
     .carousel-wrap{margin-top:12px}
+    .carousel-header{
+      padding:8px;
+      border-radius:8px;
+      background:linear-gradient(180deg,#f5f7fa,#ffffff);
+      border:1px solid rgba(8,12,20,0.04);
+      color:#475569;
+      font-weight:700;
+      font-size:14px;
+    }
 
-.carousel-header{
-  padding:8px;
-  border-radius:8px;
-  background:linear-gradient(180deg,#f5f7fa,#ffffff);
-  border:1px solid rgba(8,12,20,0.04);
-  color:#475569;
-  font-weight:700;
-  font-size:14px;
-}
+    .carousel{
+      margin-top:8px;
+      overflow:hidden;
+      border-radius:8px;
+      height:340px;
+    }
 
-.carousel{
-  margin-top:8px;
-  overflow:hidden;
-  border-radius:8px;
-  height:340px;
-}
+    .slides{
+      display:flex;
+      transition:transform 0.6s ease;
+      gap:0;
+    }
 
-.slides{
-  display:flex;
-  transition:transform 0.6s ease;
-  gap:0; /* remove spacing so no overlapping happens */
-}
+    .slide{
+      min-width:100%;
+      flex-shrink:0;
+      padding:0;
+      height:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
 
-.slide{
-  min-width:100%;
-  flex-shrink:0;
-  padding:0; /* remove padding causing the image peek */
-  height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+    .slide img{
+      width:100%;
+      height:340px;
+      object-fit:contain;
+      border-radius:8px;
+    }
 
-.slide img{
-  width:100%;
-  height:340px;
-  object-fit:contain; /* show FULL image inside frame */
-  border-radius:8px;
-}
-    
     /* instructions in light shiny box (smaller text) */
     .instructions-box{margin-top:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#f8fbff,#ffffff);border:1px solid rgba(8,12,20,0.04);box-shadow:0 6px 18px rgba(11,97,255,0.03)}
     .how-title{font-weight:800;color:#111;margin-bottom:8px}
@@ -105,6 +104,8 @@
       .qr-frame{width:260px;height:260px}
       .title{font-size:22px}
     }
+
+    .disabled { opacity: 0.5; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -149,285 +150,281 @@
       <!-- instructions -->
       <div class="instructions-box">
         <div class="how-title">Instruction ❗</div>
-        <div class="how-list" id="howList"></div>
+        <div class="how-list" id="howList">
+          <div class="how-item">Open any UPI app or scan the QR with your UPI app.</div>
+          <div class="how-item">Confirm the UPI ID and payee name before approving.</div>
+          <div class="how-item">Enter the exact amount in your UPI app (do not rely on defaults).</div>
+          <div class="how-item">After payment, take a screenshot and send it to admin for confirmation.</div>
+        </div>
       </div>
 
       <!-- contact -->
       <div class="contact-row">
         <button id="contactBtn" class="contact-btn">💬 Contact Admin</button>
-        <div class="contact-small" id="contactSmall">Sesnd Screenshot to Admin</div>
+        <div class="contact-small" id="contactSmall">Send Screenshot to Admin</div>
       </div>
 
     </div>
   </div>
 
-  <script>
-  document.addEventListener('DOMContentLoaded', function () {
+<script>
+/*
+  THIS PAGE NO LONGER CONTAINS ANY HARDCODED UPI/QR VALUES OR AUTOMATIC QR GENERATION.
+  It reads values from an external file named `config.js` that must set a global `CONFIG` object:
 
-    // ---------- CONFIG ----------
-    // OPTIONAL: set RAW_CONFIG_URL to your raw.githubusercontent.com config.js URL for faster GitHub commit visibility.
-    // Example: "https://raw.githubusercontent.com/<username>/<repo>/<branch>/config.js"
-    const RAW_CONFIG_URL = ""; // optional, set once if you want faster git->web propagation
-
-    const POLL_INTERVAL_MS = 1000;   // poll every second
-    const LS_KEY = 'PAY_CONFIG_CACHE_V2'; // localStorage key for last known config
-
-    // ADMIN starts with no defaults for UPI/QRLINK (totally dependent on config.js)
-    const ADMIN = {
-      upi: '',            // intentionally empty — config must provide
-      payeeName: '',      // optional, keep blank (you can extend config later if needed)
-      contactLink: 'https://wa.me/919999999999',
-      contactText: 'Contact Admin',
-      carousel: [
-        'https://i.ibb.co/gFPbGzZH/20251118-155331.jpg',
-        'https://i.ibb.co/TBTd5S3p/20251118-160648.jpg',
-        'https://i.ibb.co/fVJnf9V7/20251118-153613.jpg'
-      ],
-      instructions: [
-        'Open any UPI app or scan the QR with your UPI app.',
-        'Confirm the UPI ID and payee name before approving.',
-        'Enter the exact amount in your UPI app (do not rely on defaults).',
-        'After payment, take a screenshot and send it to admin for confirmation.'
-      ]
+  Example config.js:
+    window.CONFIG = {
+      qrlink: "https://example.com/your-qr.png",
+      upiid: "merchant@upi"
     };
 
-    // helper to safely parse config.js text (no eval)
-    function parseConfigJsText(txt){
-      const qMatch = txt.match(/Qrlink\s*:\s*["']([^"']*)["']/);
-      const uMatch = txt.match(/Upiid\s*:\s*["']([^"']*)["']/);
-      return {
-        Qrlink: qMatch ? qMatch[1] : '',
-        Upiid: uMatch ? uMatch[1] : ''
-      };
+  The page will dynamically load and re-load that script (cache-busted) to reflect changes quickly.
+*/
+
+/* --- elements --- */
+const upiField = document.getElementById('upiField');
+const qrImg = document.getElementById('qrimg');
+const downloadBtn = document.getElementById('downloadBtn');
+const slidesEl = document.getElementById('slides');
+const howList = document.getElementById('howList');
+const contactBtn = document.getElementById('contactBtn');
+const copyBtn = document.getElementById('copyUpi');
+
+let currentConfig = null;
+let configScriptEl = null;
+let carouselInterval = null;
+
+/* --- utility: show toast --- */
+function showToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.position='fixed'; t.style.left='50%'; t.style.bottom='22px'; t.style.transform='translateX(-50%)';
+  t.style.background='rgba(11,97,255,0.95)'; t.style.color='#fff'; t.style.padding='8px 12px';
+  t.style.borderRadius='8px'; t.style.boxShadow='0 8px 20px rgba(11,97,255,0.12)'; t.style.zIndex=9999;
+  document.body.appendChild(t);
+  setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
+}
+
+/* --- update UI from CONFIG --- */
+function applyConfig(cfg){
+  currentConfig = cfg || null;
+
+  // UPI field
+  if(currentConfig && typeof currentConfig.upiid === 'string' && currentConfig.upiid.trim()){
+    upiField.textContent = currentConfig.upiid.trim();
+    copyBtn.classList.remove('disabled');
+    copyBtn.disabled = false;
+  } else {
+    upiField.textContent = '';
+    copyBtn.classList.add('disabled');
+    copyBtn.disabled = true;
+  }
+
+  // QR image: must come from config.qrlink
+  if(currentConfig && typeof currentConfig.qrlink === 'string' && currentConfig.qrlink.trim()){
+    qrImg.src = currentConfig.qrlink.trim();
+    qrImg.alt = 'QR image';
+    downloadBtn.classList.remove('disabled');
+    downloadBtn.disabled = false;
+  } else {
+    // No QR configured -> clear image and mark download disabled
+    qrImg.src = '';
+    qrImg.alt = 'No QR configured';
+    downloadBtn.classList.add('disabled');
+    downloadBtn.disabled = true;
+  }
+
+  // App buttons enable/disable based on upiid presence
+  const appButtons = [document.getElementById('btnPaytm'), document.getElementById('btnGpay'), document.getElementById('btnPhonePe'), document.getElementById('btnOther')];
+  if(currentConfig && currentConfig.upiid){
+    appButtons.forEach(b => b.classList.remove('disabled'), b => b.disabled = false);
+    appButtons.forEach(b => b.disabled = false);
+  } else {
+    appButtons.forEach(b => b.classList.add('disabled'));
+    appButtons.forEach(b => b.disabled = true);
+  }
+
+  // Optionally handle carousel images if present (non-admin, optional)
+  while(slidesEl.firstChild) slidesEl.removeChild(slidesEl.firstChild);
+  if(currentConfig && Array.isArray(currentConfig.carousel) && currentConfig.carousel.length){
+    currentConfig.carousel.forEach(url => {
+      const s = document.createElement('div'); s.className = 'slide';
+      const img = document.createElement('img'); img.src = url; img.alt = 'step';
+      s.appendChild(img); slidesEl.appendChild(s);
+    });
+    startCarousel(currentConfig.carousel.length);
+  } else {
+    stopCarousel();
+  }
+
+  // Optional contact text if present
+  if(currentConfig && currentConfig.contactText){
+    contactBtn.textContent = (currentConfig.contactText || 'Contact Admin') + '  💬';
+    if(currentConfig.contactLink) {
+      contactBtn.dataset.link = currentConfig.contactLink;
+      contactBtn.classList.remove('disabled');
+      contactBtn.disabled = false;
+    } else {
+      contactBtn.dataset.link = '';
+      contactBtn.classList.add('disabled');
+      contactBtn.disabled = true;
     }
+  } else {
+    contactBtn.textContent = '💬 Contact Admin';
+    contactBtn.dataset.link = '';
+    contactBtn.classList.add('disabled');
+    contactBtn.disabled = true;
+  }
+}
 
-    // read cached parsed config from localStorage
-    function readCached(){
-      try{
-        const s = localStorage.getItem(LS_KEY);
-        if(!s) return null;
-        return JSON.parse(s);
-      }catch(e){ return null; }
-    }
-    function writeCached(parsed){
-      try{ localStorage.setItem(LS_KEY, JSON.stringify(parsed || {})); }catch(e){}
-    }
+/* --- carousel helpers --- */
+let cIndex = 0;
+function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
+function startCarousel(len){
+  stopCarousel();
+  if(len <= 1) return;
+  cIndex = 0;
+  carouselInterval = setInterval(()=>{ cIndex = (cIndex+1) % len; showSlide(cIndex); }, 2200);
+}
+function stopCarousel(){
+  if(carouselInterval) { clearInterval(carouselInterval); carouselInterval = null; }
+  slidesEl.style.transform = 'translateX(0%)';
+}
 
-    // fetch config text from candidates (raw URL first if set, then site-relative /config.js)
-    async function fetchConfigText(){
-      const candidates = [];
-      if(RAW_CONFIG_URL && RAW_CONFIG_URL.trim() !== "") candidates.push(RAW_CONFIG_URL + '?cb=' + Date.now());
-      candidates.push(window.location.origin + '/config.js?cb=' + Date.now());
-      for(const url of candidates){
-        try{
-          const res = await fetch(url, { cache: 'no-store' });
-          if(!res.ok) continue;
-          const txt = await res.text();
-          if(txt && txt.trim().length > 0) return { raw: txt, url };
-        }catch(e){}
-      }
-      return null;
-    }
+/* --- config loader: dynamically load config.js (cache-busted) --- */
+function removeExistingConfigScript(){
+  if(configScriptEl && configScriptEl.parentNode){
+    configScriptEl.remove();
+    configScriptEl = null;
+  }
+}
+function loadConfigScript(){
+  // Remove previous global CONFIG to ensure we only use what's in new file
+  try { delete window.CONFIG; } catch(e){ window.CONFIG = undefined; }
+  removeExistingConfigScript();
 
-    // generate QR using UPI id (if Qrlink blank)
-    function generateQrFromUpi(){
-      const uri = 'upi://pay?' + new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'}).toString();
-      return `https://chart.googleapis.com/chart?cht=qr&chs=1000x1000&chl=${encodeURIComponent(uri)}`;
-    }
-
-    // apply parsed config to UI
-    function applyParsedConfig(parsed){
-      let applied = false;
-      if(parsed.Upiid && parsed.Upiid.trim() !== '' && ADMIN.upi !== parsed.Upiid.trim()){
-        ADMIN.upi = parsed.Upiid.trim();
-        const upiField = document.getElementById('upiField');
-        if(upiField) upiField.textContent = ADMIN.upi;
-        applied = true;
-      }
-      if(typeof parsed.Qrlink === 'string'){
-        const qrEl = document.getElementById('qrimg');
-        const newQ = parsed.Qrlink.trim();
-        const newSrc = newQ !== '' ? newQ : (ADMIN.upi ? generateQrFromUpi() : '');
-        if(qrEl){
-          // set src only if non-empty; if empty, clear src (so placeholder/empty shows)
-          if(newSrc && qrEl.src !== newSrc){
-            qrEl.src = newSrc;
-            applied = true;
-          } else if(!newSrc){
-            // clear src to remove previous QR if config removed values
-            qrEl.removeAttribute('src');
-            applied = true;
-          }
-        }
-      }
-      return applied;
-    }
-
-    // initialize carousel & instructions (unchanged)
-    (function initCarouselAndInstructions(){
-      const slidesEl = document.getElementById('slides');
-      slidesEl.innerHTML = '';
-      ADMIN.carousel.forEach(url => {
-        const s = document.createElement('div'); s.className = 'slide';
-        const img = document.createElement('img'); img.src = url; img.alt = 'step';
-        s.appendChild(img); slidesEl.appendChild(s);
-      });
-      let cIndex = 0;
-      function showSlide(i){ slidesEl.style.transform = `translateX(-${i*100}%)`; }
-      if (slidesEl.children.length > 1) {
-        setInterval(()=>{ cIndex = (cIndex+1) % slidesEl.children.length; showSlide(cIndex); }, 2200);
-      }
-      const howList = document.getElementById('howList');
-      howList.innerHTML = '';
-      ADMIN.instructions.forEach(line => {
-        const d = document.createElement('div'); d.className = 'how-item'; d.textContent = line; howList.appendChild(d);
-      });
-    })();
-
-    // buttons (copy/download/app openers/contact) — unchanged behavior
-    (function setupButtons(){
-      const qrEl = document.getElementById('qrimg');
-      const downloadBtn = document.getElementById('downloadBtn');
-      if(downloadBtn){
-        downloadBtn.addEventListener('click', async ()=>{
-          try{
-            const src = qrEl.src;
-            if(!src) throw new Error('no-qr-src');
-            const resp = await fetch(src, { mode: 'cors' });
-            if(!resp.ok) throw new Error('Network response not ok');
-            const blob = await resp.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'upi-qr-' + Date.now() + '.png'; document.body.appendChild(a); a.click(); a.remove();
-            URL.revokeObjectURL(url);
-            showToast('QR downloaded to device');
-            return;
-          }catch(err){
-            // fallback attempts
-            try{
-              const a2 = document.createElement('a');
-              a2.href = qrEl.src || '#';
-              a2.target = '_blank';
-              a2.download = 'upi-qr-' + Date.now() + '.png';
-              document.body.appendChild(a2); a2.click(); a2.remove();
-              showToast('If download blocked, image opened in new tab — save manually');
-            }catch(e){
-              if(qrEl.src) window.open(qrEl.src, '_blank');
-              showToast('Could not download — opened image to save manually');
-            }
-          }
-        });
-      }
-
-      const copyBtn = document.getElementById('copyUpi');
-      if(copyBtn){
-        copyBtn.addEventListener('click', async ()=>{
-          try{
-            if(!ADMIN.upi) throw new Error('no-upi');
-            await navigator.clipboard.writeText(ADMIN.upi);
-            showToast('UPI copied to clipboard');
-          }catch(e){
-            const t = document.createElement('textarea'); t.value = ADMIN.upi || ''; document.body.appendChild(t); t.select();
-            document.execCommand('copy'); t.remove();
-            showToast('UPI copied to clipboard');
-          }
-        });
-      }
-
-      const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
-      function openChain(pref){
-        if(!ADMIN.upi){
-          alert('UPI not configured.');
-          return;
-        }
-        const query = new URLSearchParams({pa:ADMIN.upi,pn:ADMIN.payeeName,cu:'INR'}).toString();
-        const generic = 'upi://pay?' + query;
-        const ua = navigator.userAgent || '';
-        const isAndroid = /Android/i.test(ua);
-        const isIOS = /iPhone|iPad|iPod/i.test(ua);
-        if(isAndroid){
-          let i = 0;
-          function next(){
-            if(i >= pref.length){ window.location.href = generic; return; }
-            const key = pref[i++]; const pkg = PACK[key];
-            if(!pkg){ next(); return; }
-            const intent = `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`;
-            window.location.href = intent;
-            setTimeout(next, 1200);
-          }
-          next();
-        } else if(isIOS){
-          window.location.href = generic;
-        } else {
-          alert('Open this page on a mobile device to complete the UPI payment.');
-        }
-      }
-
-      const btnPaytm = document.getElementById('btnPaytm');
-      const btnGpay = document.getElementById('btnGpay');
-      const btnPhonePe = document.getElementById('btnPhonePe');
-      const btnOther = document.getElementById('btnOther');
-      if(btnPaytm) btnPaytm.addEventListener('click', ()=>openChain(['paytm','phonepe','gpay']));
-      if(btnGpay) btnGpay.addEventListener('click', ()=>openChain(['gpay','phonepe','paytm']));
-      if(btnPhonePe) btnPhonePe.addEventListener('click', ()=>openChain(['phonepe','paytm','gpay']));
-      if(btnOther) btnOther.addEventListener('click', ()=>{ 
-        if(!ADMIN.upi){ alert('UPI not configured.'); return; }
-        window.location.href = 'upi://pay?pa='+encodeURIComponent(ADMIN.upi)+'&pn='+encodeURIComponent(ADMIN.payeeName)+'&cu=INR'; 
-      });
-
-      const contactBtn = document.getElementById('contactBtn');
-      if(contactBtn) contactBtn.addEventListener('click', ()=> window.open(ADMIN.contactLink, '_blank'));
-    })();
-
-    function showToast(msg){
-      const t = document.createElement('div');
-      t.textContent = msg;
-      t.style.position='fixed'; t.style.left='50%'; t.style.bottom='22px'; t.style.transform='translateX(-50%)';
-      t.style.background='rgba(11,97,255,0.95)'; t.style.color='#fff'; t.style.padding='8px 12px';
-      t.style.borderRadius='8px'; t.style.boxShadow='0 8px 20px rgba(11,97,255,0.12)'; t.style.zIndex=9999;
-      document.body.appendChild(t);
-      setTimeout(()=>t.style.opacity='0.01',1500); setTimeout(()=>t.remove(),2000);
-    }
-
-    // QR fallback handler
-    const qrEl = document.getElementById('qrimg');
-    if(qrEl) qrEl.addEventListener('error', ()=>{ qrEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'; });
-
-    // ---------- cache-first apply (so last valid config survives refresh) ----------
-    (function applyCached(){
-      const cached = readCached();
-      if(cached && (cached.Qrlink !== undefined || cached.Upiid !== undefined)){
-        applyParsedConfig({ Qrlink: cached.Qrlink || '', Upiid: cached.Upiid || '' });
+  const s = document.createElement('script');
+  s.src = 'config.js?ts=' + Date.now(); // cache-bust
+  s.id = 'configScript';
+  s.async = true;
+  s.onload = () => {
+    // Expect the external script to set window.CONFIG = { qrlink: "...", upiid: "..." };
+    try {
+      if(window.CONFIG && typeof window.CONFIG === 'object'){
+        applyConfig(window.CONFIG);
       } else {
-        // leave empty until config fetched - totally dependent on config.js
-        const upiField = document.getElementById('upiField');
-        if(upiField) upiField.textContent = '';
+        applyConfig(null);
+        console.warn('config.js loaded but window.CONFIG not set or invalid.');
       }
-    })();
-
-    // ---------- polling logic ----------
-    let lastRaw = null;
-    async function pollOnce(){
-      const got = await fetchConfigText();
-      if(!got) return;
-      if(lastRaw === null || got.raw !== lastRaw){
-        lastRaw = got.raw;
-        const parsed = parseConfigJsText(got.raw);
-        // apply parsed config (only if present)
-        applyParsedConfig(parsed);
-        // persist parsed for survival across refresh
-        writeCached(parsed);
-        showToast('Config updated');
-      }
+    } catch(err){
+      console.error('Failed applying CONFIG:', err);
+      applyConfig(null);
     }
+  };
+  s.onerror = () => {
+    console.warn('Failed to load config.js');
+    applyConfig(null);
+  };
+  document.head.appendChild(s);
+  configScriptEl = s;
+}
 
-    // initial fetch then poll
-    (async function initial(){
-      await pollOnce(); // try immediate fetch
-      setInterval(pollOnce, POLL_INTERVAL_MS);
-    })();
+/* --- continuously sync config.js (reload every n seconds) --- */
+const CONFIG_POLL_INTERVAL_MS = 2500; // change as needed
+loadConfigScript();
+setInterval(loadConfigScript, CONFIG_POLL_INTERVAL_MS);
 
-  }); // DOMContentLoaded end
-  </script>
+/* --- Download QR (only if qrlink present) --- */
+async function downloadQr(){
+  try{
+    const src = qrImg.src;
+    if(!src) throw new Error('No QR configured');
+    const resp = await fetch(src, {mode:'cors'});
+    if(!resp.ok) throw new Error('Network response not ok');
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'upi-qr-' + Date.now() + '.png'; document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    showToast('QR downloaded to device');
+  }catch(err){
+    console.warn('Download failed, fallback to open', err);
+    if(qrImg.src){
+      window.open(qrImg.src, '_blank');
+      showToast('Could not download directly — opened image to save manually');
+    } else {
+      showToast('No QR configured to download');
+    }
+  }
+}
+downloadBtn.addEventListener('click', downloadQr);
 
+/* --- Copy UPI to clipboard --- */
+copyBtn.addEventListener('click', async ()=>{
+  if(!currentConfig || !currentConfig.upiid) { showToast('No UPI configured'); return; }
+  try{
+    await navigator.clipboard.writeText(currentConfig.upiid);
+    showToast('UPI copied to clipboard');
+  }catch(e){
+    // fallback
+    const t = document.createElement('textarea'); t.value = currentConfig.upiid; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); t.remove();
+    showToast('UPI copied to clipboard');
+  }
+});
+
+/* --- App openers (use upiid from config) --- */
+const PACK = { gpay:'com.google.android.apps.nbu.paisa.user', phonepe:'com.phonepe.app', paytm:'net.one97.paytm' };
+function openChain(pref){
+  if(!currentConfig || !currentConfig.upiid){
+    alert('UPI ID not configured.');
+    return;
+  }
+  const query = new URLSearchParams({pa: currentConfig.upiid, cu:'INR'}).toString();
+  const generic = 'upi://pay?' + query;
+  const ua = navigator.userAgent || '';
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  if(isAndroid){
+    let i = 0;
+    function next(){
+      if(i >= pref.length){ window.location.href = generic; return; }
+      const key = pref[i++]; const pkg = PACK[key];
+      if(!pkg){ next(); return; }
+      const intent = `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`;
+      window.location.href = intent;
+      setTimeout(next, 1200);
+    }
+    next();
+  } else if(isIOS){
+    window.location.href = generic;
+  } else {
+    alert('Open this page on a mobile device to complete the UPI payment.');
+  }
+}
+document.getElementById('btnPaytm').addEventListener('click', ()=>openChain(['paytm','phonepe','gpay']));
+document.getElementById('btnGpay').addEventListener('click', ()=>openChain(['gpay','phonepe','paytm']));
+document.getElementById('btnPhonePe').addEventListener('click', ()=>openChain(['phonepe','paytm','gpay']));
+document.getElementById('btnOther').addEventListener('click', ()=> {
+  if(!currentConfig || !currentConfig.upiid){ alert('UPI ID not configured.'); return; }
+  window.location.href = 'upi://pay?pa=' + encodeURIComponent(currentConfig.upiid) + '&cu=INR';
+});
+
+/* --- Contact button --- */
+contactBtn.addEventListener('click', ()=>{
+  const link = contactBtn.dataset.link || '';
+  if(link) window.open(link, '_blank');
+  else showToast('Contact link not configured');
+});
+
+/* --- QR image error fallback --- */
+qrImg.addEventListener('error', ()=>{
+  // show a simple inline SVG indicating missing/unavailable QR
+  qrImg.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="20">QR Unavailable</text></svg>'
+  );
+});
+
+</script>
 </body>
 </html>
