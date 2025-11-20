@@ -1,4 +1,4 @@
 window.CONFIG = {
-  qrlink: "https://i.ibb.co/J4V3hyx/ae5fe3dc423e44c0ddbef5dc64fa356b.png",
-  upiid: "8799920376@okbizaxis"
+  qrlink: "https://i.ibb.co/4nLzGdHd/1761661490.jpg",
+  upiid: "gpay-12194814198@okbizaxis"
 };
