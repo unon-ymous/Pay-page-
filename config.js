@@ -1,4 +1,4 @@
 window.CONFIG = {
-  qrlink: "https://branch-panel-data.s3.ap-south-1.amazonaws.com/images/qr_code/1763622960.jpeg",
+  qrlink: "https://i.ibb.co/8n0NbsTy/1763622960.jpg",
   upiid: "8108227520@okbizaxis"
 };
